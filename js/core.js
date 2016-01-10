@@ -1,4 +1,4 @@
-var ver = "0.1a r7"
+var ver = "0.1a r8"
 var canvas;
 var ctx;
 
@@ -22,9 +22,11 @@ var falcon_fa = 90;
 //Objects
 var bullets = [];
 
-var asteroid_radius = 15;
+var asteroid_radius = 20;
 var asteroids = [];
 var asteroids_lastbelt = 0;
+
+var last_shot = 0;
 
 //Audio Elements
 var sound;
@@ -34,8 +36,7 @@ var acc = 0;
 
 //System
 var keys = [];
-var lastCalledTime, fps;
-var lastFPSUpdate = 0;
+var lastCalledTime, fps, lastFPSUpdate = 0;
 
 window.addEventListener("load", onLoad);
 
@@ -46,11 +47,17 @@ function onLoad() {
 	
 	document.addEventListener("keydown", function(e) {
 		keys[e.keyCode] = true;
-		if(e.keyCode == 32) shoot();
+		if(e.keyCode == 32) {
+					if(new Date().getTime() - last_shot > 180 ) {	
+						shoot();
+						last_shot = new Date().getTime();
+				}
+		}
 	});
 	
 	document.addEventListener("keyup", function(e) {
 		keys[e.keyCode] = false;
+		
 	});
 	
 	canvas.width  = window.innerWidth - ((5/100)*window.innerWidth);
@@ -61,8 +68,9 @@ function onLoad() {
 	
 	sound = document.createElement("audio");
 	sound.src = "audio/interstellar.mp3";
-	//sound.play();
-	
+	sound.loop = true;
+	sound.play();
+		
 	background = document.createElement("img");
 	background.src = "images/background.jpg";
 	falcon = new Image();
@@ -117,7 +125,11 @@ function render() {
 	}
 	
 	falcon_fa -= keys[37] == true ? 5 : 0;
+		falcon_fa = falcon_fa < -360 ? 0 : falcon_fa;
+	
 	falcon_fa += keys[39] == true ? 5 : 0;
+		falcon_fa = falcon_fa > 360 ? 0 : falcon_fa;
+	
 	
 	if(keys[38] == true) {
 		acc = 3;
@@ -136,8 +148,6 @@ function render() {
 			lastFPSUpdate = Date.now();
 	}
 	lastCalledTime = Date.now();
-	
-	
 	
 }
 
@@ -272,5 +282,5 @@ function debug() {
 	ctx.fillText("IntoDarkness ver. " + ver, 10, 20);
 	ctx.fillText("a: " + Math.round(falcon_fa, 2) + " x: " + Math.round(falcon_x, 2) + " y: " + Math.round(falcon_y, 2) + " vx: " + Math.round(falcon_vx, 2) + " vy: " + Math.round(falcon_vy, 2) + " tvx: " + Math.round(falcon_tvx, 2) + " tvy: " + Math.round(falcon_tvy, 2), 10, 40);
 	ctx.fillText("bullets: " + bullets.length + " asteroids: " + asteroids.length,10, 60);
-	ctx.fillText("fps: " + Math.round(fps, -1),10, 80);
+	ctx.fillText("fps: " + Math.round(fps, 0),10, 80);
 }
