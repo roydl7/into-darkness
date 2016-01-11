@@ -37,6 +37,7 @@ var acc = 0;
 //System
 var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
+var canvasShake = false;
 
 window.addEventListener("load", onLoad);
 
@@ -140,6 +141,8 @@ function render() {
 	drawBackground();
 	drawFalcon();
 	render_objects();
+	
+	
 	debug();
 
 	delta = (new Date().getTime() - lastCalledTime)/1000;
@@ -152,6 +155,9 @@ function render() {
 }
 
 function drawBackground() {
+	if(canvasShake) {
+		ctx.drawImage(background, Math.random() * 10 + 0.1 * (-1920/2 - falcon_x + canvas.width/2), Math.random() * 10 + 0.1 *(-1200/2 - falcon_y + canvas.height/2));
+	} else 
 	ctx.drawImage(background, 0.1 * (-1920/2 - falcon_x + canvas.width/2), 0.1 *(-1200/2 - falcon_y + canvas.height/2));
 }
 
@@ -217,6 +223,9 @@ function render_objects() {
 				sound.src = "audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
 				sound.play();
 	
+				canvasShake = true;
+				setTimeout(function() { canvasShake = false; }, 1000);
+	
 				explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0 });
 				asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
 				break;
@@ -255,6 +264,9 @@ function move() {
 	falcon_y += falcon_vy;
 	
 }
+
+
+
 
 
 function checkBounds() {
