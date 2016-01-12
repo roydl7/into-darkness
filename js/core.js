@@ -6,10 +6,12 @@ var ctx;
 var falcon, falcon2;
 var background;
 var bullet_img;
-var explosionsprite;
+var explosionsprite = [];
 
 //Explosion
-var explosion_radius = 192/2;
+var explosion_radius = [192/2, 256];
+var explosion_imgw = [192, 256];
+var explosion_size = [1, 3.0];
 var explosions = [];
 
 //Falcon Coords
@@ -80,9 +82,11 @@ function onLoad() {
 	falcon2.src = "images/mfalconacc.png";
 	bullet_img = new Image();
 	bullet_img.src = "images/bullet.png";
-	explosionsprite = new Image();
-	explosionsprite.src = "images/explosion_sprite.png";
 	
+	explosionsprite[0] = new Image();
+	explosionsprite[0].src = "images/explosion_sprite.png";
+	explosionsprite[1] = new Image();
+	explosionsprite[1].src = "images/explosion2_sprite.png";
 	
 	
 	render();
@@ -216,6 +220,10 @@ function render_objects() {
 	} 
 
 	for(var i = 0; i < asteroids.length; i++) {
+		
+		var current_asteroid_status = true; //Dont call Falcon-Asteroid if asteroid was destroyed by a bullet
+		
+		//Bullet-Asteroid Collision
 		for(var j = 0; j < bullets.length; j++) {
 			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15)) {
 				
@@ -226,16 +234,40 @@ function render_objects() {
 				canvasShake = true;
 				setTimeout(function() { canvasShake = false; }, 1000);
 	
-				explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0 });
+				explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0, type: 0 });
 				asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
+				current_asteroid_status = false;
 				break;
 			}
 		}
+		
+		if(!current_asteroid_status) continue;
+		
+		//Falcon-Asteroid Collision
+		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 50)) {
+				
+				falcon_vx = 0;
+				falcon_vy = 0;
+				
+				sound = document.createElement("audio");
+				sound.src = "audio/explosion3.mp3";
+				sound.play();
+	
+				canvasShake = true;
+				setTimeout(function() { canvasShake = false; }, 3000);
+	
+				explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0, type: 1 });
+				asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
+				break;
+		}
+		
 	}
 	
+
+	
 	for(var i = 0; i < explosions.length; i++) {
-		
-		ctx.drawImage(explosionsprite, (explosion_radius * 2) * explosions[i].spriteid, 0, explosion_radius * 2, explosion_radius * 2, explosions[i].x - explosion_radius, explosions[i].y - explosion_radius, explosion_radius * 2, explosion_radius * 2);
+		var type = explosions[i].type;
+		ctx.drawImage(explosionsprite[type], explosion_imgw[type] * explosions[i].spriteid, 0, explosion_imgw[type], explosion_imgw[type], explosions[i].x - (explosion_imgw[type]/2) * explosion_size[type], explosions[i].y - (explosion_imgw[type]/2) * explosion_size[type], explosion_imgw[type] * explosion_size[type], explosion_imgw[type] * explosion_size[type]);
 		if(explosions[i].spriteid++ > 64) {
 			explosions.splice(explosions.indexOf(explosions[i]), 1);
 		}
