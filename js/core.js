@@ -40,6 +40,7 @@ var acc = 0;
 var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
+var sound_muted = false;
 
 window.addEventListener("load", onLoad);
 
@@ -69,10 +70,10 @@ function onLoad() {
 	falcon_x = canvas.width/2;
 	falcon_y = canvas.height/2;
 	
-	sound = document.createElement("audio");
-	sound.src = "audio/interstellar.mp3";
-	sound.loop = true;
-	sound.play();
+	music = document.createElement("audio");
+	music.src = "audio/interstellar.mp3";
+	music.loop = true;
+	music.play();
 		
 	background = document.createElement("img");
 	background.src = "images/background.jpg";
@@ -179,9 +180,12 @@ function shoot() {
 	var bullet = { angle: falcon_fa, x: falcon_x, y: falcon_y };
 	bullets.push(bullet);
 	
-	sound = document.createElement("audio");
-	sound.src = "audio/pew.mp3";
-	sound.play();
+	if(!sound_muted) {
+		sound = document.createElement("audio");
+		sound.src = "audio/pew.mp3";
+		sound.play();
+	}
+
 
 }
 
@@ -227,9 +231,12 @@ function render_objects() {
 		for(var j = 0; j < bullets.length; j++) {
 			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15)) {
 				
-				sound = document.createElement("audio");
-				sound.src = "audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
-				sound.play();
+		
+				if(!sound_muted) {
+					sound = document.createElement("audio");
+					sound.src = "audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.play();
+				}
 	
 				canvasShake = true;
 				setTimeout(function() { canvasShake = false; }, 1000);
@@ -244,15 +251,17 @@ function render_objects() {
 		if(!current_asteroid_status) continue;
 		
 		//Falcon-Asteroid Collision
-		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 50)) {
+		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30)) {
 				
 				falcon_vx = 0;
 				falcon_vy = 0;
 				
-				sound = document.createElement("audio");
-				sound.src = "audio/explosion3.mp3";
-				sound.play();
-	
+				if(!sound_muted) {
+					sound = document.createElement("audio");
+					sound.src = "audio/explosion3.mp3";
+					sound.play();
+				}
+				
 				canvasShake = true;
 				setTimeout(function() { canvasShake = false; }, 3000);
 	
