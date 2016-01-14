@@ -36,6 +36,10 @@ var music;
 
 var acc = 0;
 
+//Stats
+var stats_destroyed = 0;
+var stats_deaths = 0;
+
 //System
 var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
@@ -103,7 +107,7 @@ function asteroid_belt() {
 		var aa = 110 - Math.floor(Math.random() * 150);
 		var af = new Image();
 		af.src = "images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
-		var asteroid = { angle: aa, x: ax, y: ay, img: af};
+		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
 	
@@ -113,7 +117,7 @@ function asteroid_belt() {
 		var aa = 240 - Math.floor(Math.random() * 150);
 		var af = new Image();
 		af.src = "images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
-		var asteroid = { angle: aa, x: ax, y: ay, img: af};
+		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
 	asteroids_lastbelt = new Date().getTime();
@@ -146,7 +150,7 @@ function render() {
 	drawBackground();
 	drawFalcon();
 	render_objects();
-	
+	drawScore();
 	
 	debug();
 
@@ -161,7 +165,7 @@ function render() {
 
 function drawBackground() {
 	if(canvasShake) {
-		ctx.drawImage(background, Math.random() * 10 + 0.1 * (-1920/2 - falcon_x + canvas.width/2), Math.random() * 10 + 0.1 *(-1200/2 - falcon_y + canvas.height/2));
+		ctx.drawImage(background, Math.random() * 5 + 0.1 * (-1920/2 - falcon_x + canvas.width/2), Math.random() * 5 + 0.1 *(-1200/2 - falcon_y + canvas.height/2));
 	} else 
 	ctx.drawImage(background, 0.1 * (-1920/2 - falcon_x + canvas.width/2), 0.1 *(-1200/2 - falcon_y + canvas.height/2));
 }
@@ -209,10 +213,12 @@ function render_objects() {
 	
 	} 
 	
+	
 	for(var i = 0; i < asteroids.length; i++) {
 		asteroids[i].x = asteroids[i].x - 3* Math.cos(asteroids[i].angle * Math.PI/180);
 		asteroids[i].y = asteroids[i].y - 3* Math.sin(asteroids[i].angle * Math.PI/180);
-		ctx.drawImage(asteroids[i].img, asteroids[i].x - asteroid_radius, asteroids[i].y - asteroid_radius, asteroid_radius * 2, asteroid_radius * 2);
+		var current_asteroid_radius = asteroid_radius * asteroids[i].size;
+		ctx.drawImage(asteroids[i].img, asteroids[i].x - current_asteroid_radius, asteroids[i].y - current_asteroid_radius, current_asteroid_radius * 2, current_asteroid_radius * 2);
 		
 		ctx.font = '10pt Courier New';
 		ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1), asteroids[i].x, asteroids[i].y);
@@ -229,7 +235,7 @@ function render_objects() {
 		
 		//Bullet-Asteroid Collision
 		for(var j = 0; j < bullets.length; j++) {
-			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15)) {
+			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15 * asteroids[i].size)) {
 				
 		
 				if(!sound_muted) {
@@ -239,11 +245,14 @@ function render_objects() {
 				}
 	
 				canvasShake = true;
-				setTimeout(function() { canvasShake = false; }, 1000);
+				setTimeout(function() { canvasShake = false; }, 500);
 	
 				explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0, type: 0 });
 				asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
+				bullets.splice(bullets.indexOf(bullets[j]), 1);
 				current_asteroid_status = false;
+				
+				stats_destroyed++;
 				break;
 			}
 		}
@@ -251,7 +260,7 @@ function render_objects() {
 		if(!current_asteroid_status) continue;
 		
 		//Falcon-Asteroid Collision
-		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30)) {
+		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size)) {
 				
 				falcon_vx = 0;
 				falcon_vy = 0;
@@ -267,6 +276,8 @@ function render_objects() {
 	
 				explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0, type: 1 });
 				asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
+				
+				stats_deaths++;
 				break;
 		}
 		
@@ -300,7 +311,6 @@ function accelerate() {
 
 function move() {
 	
-	//
 	falcon_x += falcon_vx;
 	falcon_y += falcon_vy;
 	
@@ -336,4 +346,12 @@ function debug() {
 	ctx.fillText("a: " + Math.round(falcon_fa, 2) + " x: " + Math.round(falcon_x, 2) + " y: " + Math.round(falcon_y, 2) + " vx: " + Math.round(falcon_vx, 2) + " vy: " + Math.round(falcon_vy, 2) + " tvx: " + Math.round(falcon_tvx, 2) + " tvy: " + Math.round(falcon_tvy, 2), 10, 40);
 	ctx.fillText("bullets: " + bullets.length + " asteroids: " + asteroids.length,10, 60);
 	ctx.fillText("fps: " + Math.round(fps, 0),10, 80);
+}
+
+function drawScore() {
+	ctx.font = 'bold 15pt Arial';
+    ctx.fillStyle = 'lightgreen';
+	ctx.strokeStyle = 'lightgreen';
+	ctx.fillText("Asteroids: " + stats_destroyed + "Deaths: " + stats_deaths, canvas.width - 220, 20);
+	ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
 }

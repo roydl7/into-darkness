@@ -1,2 +1,0 @@
-# Into Darkness
-Teknack Event
