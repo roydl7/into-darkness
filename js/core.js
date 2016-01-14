@@ -7,6 +7,8 @@ var falcon, falcon2;
 var background;
 var bullet_img;
 var explosionsprite = [];
+var meteorsprite = [];
+var wormhole;
 
 //Explosion
 var explosion_radius = [192/2, 256];
@@ -23,10 +25,11 @@ var falcon_fa = 90;
 
 //Objects
 var bullets = [];
+var meteors = [];
 
 var asteroid_radius = 20;
 var asteroids = [];
-var asteroids_lastbelt = 0;
+var asteroids_lastbelt = 0, meteor_lastshower = 0;
 
 var last_shot = 0;
 
@@ -45,6 +48,7 @@ var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
+var wormholeAngle = 0;
 
 window.addEventListener("load", onLoad);
 
@@ -94,6 +98,13 @@ function onLoad() {
 	explosionsprite[1].src = "images/explosion2_sprite.png";
 	
 	
+	meteorsprite[0] = new Image();
+	meteorsprite[0].src = "images/asteroids/meteorspritedown.png";
+	meteorsprite[1] = new Image();
+	meteorsprite[1].src = "images/asteroids/meteorspriteup.png";
+	
+	wormhole = new Image();
+	wormhole.src = "images/wormhole.png";
 	render();
 	   
 }
@@ -123,6 +134,26 @@ function asteroid_belt() {
 	asteroids_lastbelt = new Date().getTime();
 }
 
+function meteor_shower() {
+	var ax = falcon_x;
+	var ay = +10;
+	var aa = -90;
+	var ty = 0;
+	if(falcon_y > canvas.height/2) {
+		ay = -10;
+		aa = -90;
+		ty = 0;
+	} else {
+		ay = canvas.height + 10;
+		aa = 90;
+		ty = 1;
+	}
+	var meteor = { angle: aa, x: ax, y: ay, frameid: 0, type: ty};
+	meteors.push(meteor);
+		
+	meteor_lastshower = new Date().getTime();
+	
+}
 
 
 function render() {
@@ -133,6 +164,11 @@ function render() {
 	if(new Date().getTime() - asteroids_lastbelt > 5000) {
 		asteroid_belt();
 	}
+	
+	if(new Date().getTime() - meteor_lastshower > 1000) {
+		meteor_shower();
+	}
+	
 	
 	falcon_fa -= keys[37] == true ? 5 : 0;
 		falcon_fa = falcon_fa < -360 ? 0 : falcon_fa;
@@ -148,6 +184,7 @@ function render() {
 	
 	move();
 	drawBackground();
+	drawWormhole();
 	drawFalcon();
 	render_objects();
 	drawScore();
@@ -177,6 +214,18 @@ function drawFalcon() {
 	ctx.rotate((falcon_fa - 90) * Math.PI/180);
 	ctx.drawImage(keys[38] == true ? falcon2 : falcon, -falcon_w/2, -falcon_h/2, falcon_w, falcon_h);
 	ctx.restore();
+	
+}
+
+function drawWormhole() {
+	
+	ctx.save();
+	ctx.translate(canvas.width/2,  canvas.height/2);
+	ctx.rotate(wormholeAngle+=0.4 * Math.PI/180);
+	ctx.drawImage(wormhole, -50, -50, 100, 100);
+	ctx.restore();
+	
+
 	
 }
 
@@ -229,6 +278,24 @@ function render_objects() {
 		}
 	} 
 
+	for(var i = 0; i < meteors.length; i++) {
+		meteors[i].x = meteors[i].x - 5* Math.cos(meteors[i].angle * Math.PI/180);
+		meteors[i].y = meteors[i].y - 5* Math.sin(meteors[i].angle * Math.PI/180);
+		
+		var sx = -20;
+		var sy = 512 * meteors[i].frameid++;
+		meteors[i].frameid = meteors[i].frameid > 5 ? 0 : meteors[i].frameid + 0;
+		
+		ctx.drawImage(meteorsprite[meteors[i].type], sx, sy, 512, 512, meteors[i].x - 48, meteors[i].y - 48, 96, 96);
+
+		
+		if(isOutOfBounds(meteors[i].x, meteors[i].y)) {
+			var index = meteors.indexOf(meteors[i]);
+			meteors.splice(index, 1);
+		}
+		
+	} 
+	
 	for(var i = 0; i < asteroids.length; i++) {
 		
 		var current_asteroid_status = true; //Dont call Falcon-Asteroid if asteroid was destroyed by a bullet
@@ -292,6 +359,8 @@ function render_objects() {
 			explosions.splice(explosions.indexOf(explosions[i]), 1);
 		}
 	}
+	
+	
 }
 
 
@@ -328,7 +397,6 @@ function checkBounds() {
 	if(falcon_y > canvas.height - falcon_h/2 || falcon_y < falcon_h/2)	{
 			falcon_vy = -falcon_vy;
 	}
-	
 }
 
 function isOutOfBounds(x, y) {
@@ -351,7 +419,7 @@ function debug() {
 function drawScore() {
 	ctx.font = 'bold 15pt Arial';
     ctx.fillStyle = 'lightgreen';
-	ctx.strokeStyle = 'lightgreen';
-	ctx.fillText("Asteroids: " + stats_destroyed + "Deaths: " + stats_deaths, canvas.width - 220, 20);
-	ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+	//ctx.strokeStyle = 'lightgreen';
+	ctx.fillText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
 }
