@@ -218,7 +218,7 @@ function render() {
 	
 	//Transition
 	if(transitionInProgress) {
-		transitionValue = transitionDirection == 1 ? transitionValue + 0.01 : transitionValue - 0.01;
+		transitionValue = transitionDirection == 1 ? transitionValue + 0.05 : transitionValue - 0.05;
 		drawBlackBG(transitionValue);
 		if(transitionValue < 0.01) transitionInProgress = false;
 		if(transitionValue > 0.99) {
@@ -493,7 +493,7 @@ function drawBlackBG(a) {
 	ctx.globalAlpha = a;
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	ctx.globalAlpha = 0.6;
+	ctx.globalAlpha = 1;
 }
 
 
