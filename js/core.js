@@ -8,7 +8,7 @@ var background;
 var bullet_img;
 var explosionsprite = [];
 var meteorsprite = [];
-var wormhole;
+var wormhole = [];
 
 //Explosion
 var explosion_radius = [192/2, 256];
@@ -58,6 +58,7 @@ var wormholeEnabled = false;
 var wormhole_last = 0;
 var wormholeSize = 150;
 var wormholeCloseTimer;
+var wormholeImg = 0;
 
 var transitionDirection = 1;
 var transitionValue = 0;
@@ -117,8 +118,10 @@ function onLoad() {
 	meteorsprite[1].src = "images/asteroids/meteorspriteup.png";
 	meteor_lastshower = new Date().getTime();
 	
-	wormhole = new Image();
-	wormhole.src = "images/wormhole.png";
+	wormhole[0] = new Image();
+	wormhole[0].src = "images/wormhole1.png";
+	wormhole[1] = new Image();
+	wormhole[1].src = "images/wormhole2.png";
 	//wormhole_last = new Date().getTime();
 	
 	render();
@@ -193,7 +196,7 @@ function render() {
 		wormhole_y = 50 + Math.random() * (canvas.height - 50);
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
-		
+		wormholeImg = Math.floor(Math.random() * 2);
 		wormholeCloseTimer = setTimeout("closeWormhole()", 7000);
 	}
 	
@@ -265,7 +268,7 @@ function drawWormhole() {
 	ctx.save();
 	ctx.translate(wormhole_x,  wormhole_y);
 	ctx.rotate(wormholeAngle += 0.4  * Math.PI/180);
-	ctx.drawImage(wormhole, -wormholeTransition/2, -wormholeTransition/2, wormholeTransition, wormholeTransition);
+	ctx.drawImage(wormhole[wormholeImg], -wormholeTransition/2, -wormholeTransition/2, wormholeTransition, wormholeTransition);
 	ctx.restore();
 	
 }
