@@ -55,7 +55,7 @@ var wormholeTransitionInProgress = false;
 var wormholeTransition = 0;
 var wormhole_x, wormhole_y;
 var wormholeEnabled = false; 
-var wormhole_last = 0;
+var wormhole_last = 10000;
 var wormholeSize = 150;
 var wormholeCloseTimer;
 var wormholeImg = 0;
@@ -98,7 +98,7 @@ function onLoad() {
 	music.play();
 		
 	background = document.createElement("img");
-	background.src = "images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
+	background.src = "images/backgrounds/background" + Math.floor(Math.random() * 15) + ".jpg";
 	falcon = new Image();
 	falcon.src = "images/mfalcon.png";
 	falcon2 = new Image();
@@ -192,8 +192,8 @@ function render() {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
-		wormhole_x = 50 + Math.random() * (canvas.width - 50);
-		wormhole_y = 50 + Math.random() * (canvas.height - 50);
+		wormhole_x = 50 + Math.random() * (canvas.width - 100);
+		wormhole_y = 50 + Math.random() * (canvas.height - 100);
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
 		wormholeImg = Math.floor(Math.random() * 2);
@@ -547,6 +547,6 @@ function drawScore() {
 	ctx.font = 'bold 15pt Arial';
     ctx.fillStyle = 'lightgreen';
 	//ctx.strokeStyle = 'lightgreen';
-	ctx.fillText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+	ctx.fillText("Asteroids: " + stats_destroyed + "  Deaths: " + stats_deaths, canvas.width - 245, 20);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
 }
