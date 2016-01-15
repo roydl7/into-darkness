@@ -48,7 +48,17 @@ var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
+
 var wormholeAngle = 0;
+var wormholeTransition = 0;
+var wormhole_x, wormhole_y;
+var wormholeEnabled = false; 
+var wormhole_last = 0;
+var wormholeSize = 150;
+
+var transitionDirection = 1;
+var transitionValue = 0;
+var transitionInProgress = false;
 
 window.addEventListener("load", onLoad);
 
@@ -63,7 +73,7 @@ function onLoad() {
 					if(new Date().getTime() - last_shot > 180 ) {	
 						shoot();
 						last_shot = new Date().getTime();
-				}
+					}
 		}
 	});
 	
@@ -84,7 +94,7 @@ function onLoad() {
 	music.play();
 		
 	background = document.createElement("img");
-	background.src = "images/background.jpg";
+	background.src = "images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
 	falcon = new Image();
 	falcon.src = "images/mfalcon.png";
 	falcon2 = new Image();
@@ -102,9 +112,12 @@ function onLoad() {
 	meteorsprite[0].src = "images/asteroids/meteorspritedown.png";
 	meteorsprite[1] = new Image();
 	meteorsprite[1].src = "images/asteroids/meteorspriteup.png";
+	meteor_lastshower = new Date().getTime();
 	
 	wormhole = new Image();
 	wormhole.src = "images/wormhole.png";
+	wormhole_last = new Date().getTime();
+	
 	render();
 	   
 }
@@ -152,23 +165,36 @@ function meteor_shower() {
 	meteors.push(meteor);
 		
 	meteor_lastshower = new Date().getTime();
-	
 }
 
 
 function render() {
 	requestAnimationFrame(render);
 	
+	
 	checkBounds();
 	
 	if(new Date().getTime() - asteroids_lastbelt > 5000) {
 		asteroid_belt();
 	}
-	
-	if(new Date().getTime() - meteor_lastshower > 1000) {
+	 
+	if(new Date().getTime() - meteor_lastshower > 10000) {
 		meteor_shower();
 	}
 	
+	if(new Date().getTime() - wormhole_last > 10000) {
+		wormholeTransition = 0;
+		wormhole_x = 50 + Math.random() * (canvas.width - 50);
+		wormhole_y = 50 + Math.random() * (canvas.height - 50);
+		wormhole_last = new Date().getTime();
+		wormholeEnabled = true;
+	}
+	
+	if(wormholeTransition < wormholeSize) {
+		wormholeTransition += 0.7;
+	}
+	
+
 	
 	falcon_fa -= keys[37] == true ? 5 : 0;
 		falcon_fa = falcon_fa < -360 ? 0 : falcon_fa;
@@ -182,11 +208,28 @@ function render() {
 		accelerate(); 
 	}
 	
+	
+	
 	move();
 	drawBackground();
-	drawWormhole();
+	if(wormholeEnabled) drawWormhole();
 	drawFalcon();
 	render_objects();
+	
+	//Transition
+	if(transitionInProgress) {
+		transitionValue = transitionDirection == 1 ? transitionValue + 0.01 : transitionValue - 0.01;
+		drawBlackBG(transitionValue);
+		if(transitionValue < 0.01) transitionInProgress = false;
+		if(transitionValue > 0.99) {
+			background.src = "images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
+			transitionDirection = 0;
+			
+			for(var i = 0; i < asteroids.length; i++) asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
+			for(var i = 0; i < meteors.length; i++) meteors.splice(meteors.indexOf(meteors[i]), 1);
+		}
+	}
+	
 	drawScore();
 	
 	debug();
@@ -207,6 +250,15 @@ function drawBackground() {
 	ctx.drawImage(background, 0.1 * (-1920/2 - falcon_x + canvas.width/2), 0.1 *(-1200/2 - falcon_y + canvas.height/2));
 }
 
+function drawWormhole() {
+	ctx.save();
+	ctx.translate(wormhole_x,  wormhole_y);
+	ctx.rotate(wormholeAngle+=0.4 * Math.PI/180);
+	ctx.drawImage(wormhole, -wormholeTransition/2, -wormholeTransition/2, wormholeTransition, wormholeTransition);
+	ctx.restore();
+	
+}
+
 function drawFalcon() {
 
 	ctx.save();
@@ -217,17 +269,7 @@ function drawFalcon() {
 	
 }
 
-function drawWormhole() {
-	
-	ctx.save();
-	ctx.translate(canvas.width/2,  canvas.height/2);
-	ctx.rotate(wormholeAngle+=0.4 * Math.PI/180);
-	ctx.drawImage(wormhole, -50, -50, 100, 100);
-	ctx.restore();
-	
 
-	
-}
 
 function shoot() {
 	var bullet = { angle: falcon_fa, x: falcon_x, y: falcon_y };
@@ -243,6 +285,8 @@ function shoot() {
 }
 
 function render_objects() {
+	
+	
 	
 	for(var i = 0; i < bullets.length; i++) {
 		bullets[i].x = bullets[i].x - 5* Math.cos(bullets[i].angle * Math.PI/180);
@@ -292,6 +336,57 @@ function render_objects() {
 		if(isOutOfBounds(meteors[i].x, meteors[i].y)) {
 			var index = meteors.indexOf(meteors[i]);
 			meteors.splice(index, 1);
+		}
+		
+		var current_meteor_status = true;
+		//Bullet-Meteor Collision
+		for(var j = 0; j < bullets.length; j++) {
+			current_meteor_status = true;
+			if(inRange(meteors[i].x, meteors[i].y, bullets[j].x, bullets[j].y, 15)) {
+				
+		
+				if(!sound_muted) {
+					sound = document.createElement("audio");
+					sound.src = "audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.play();
+				}
+	
+				canvasShake = true;
+				setTimeout(function() { canvasShake = false; }, 500);
+	
+				explosions.push({ x:meteors[i].x, y:meteors[i].y, spriteid: 0, type: 0 });
+				meteors.splice(meteors.indexOf(meteors[i]), 1);
+				bullets.splice(bullets.indexOf(bullets[j]), 1);
+				current_meteor_status = false;
+				
+				stats_destroyed++;
+				break;
+			}
+		}
+		
+		if(!current_meteor_status) continue;
+		
+		//Falcon-Meteor Collision
+		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30)) {
+				
+				
+				falcon_vx = 0;
+				falcon_vy = 0;
+				
+				if(!sound_muted) {
+					sound = document.createElement("audio");
+					sound.src = "audio/explosion3.mp3";
+					sound.play();
+				}
+				
+				canvasShake = true;
+				setTimeout(function() { canvasShake = false; }, 3000);
+	
+				explosions.push({ x:meteors[i].x, y:meteors[i].y, spriteid: 0, type: 1 });
+				meteors.splice(meteors.indexOf(meteors[i]), 1);
+				
+				stats_deaths++;
+				break;
 		}
 		
 	} 
@@ -350,6 +445,14 @@ function render_objects() {
 		
 	}
 	
+	
+	//Falcon-Wormhole Collision
+	if(inRange(falcon_x, falcon_y, wormhole_x, wormhole_y, wormholeSize/3) && wormholeEnabled && Math.floor(wormholeTransition) == Math.floor(wormholeSize)) {
+			wormholeEnabled = false;
+			transitionInProgress = true;
+			transitionDirection = 1;
+			
+	}
 
 	
 	for(var i = 0; i < explosions.length; i++) {
@@ -386,7 +489,12 @@ function move() {
 }
 
 
-
+function drawBlackBG(a) {
+	ctx.globalAlpha = a;
+	ctx.fillStyle = 'black';
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.globalAlpha = 0.6;
+}
 
 
 function checkBounds() {
