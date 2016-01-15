@@ -50,11 +50,14 @@ var canvasShake = false;
 var sound_muted = false;
 
 var wormholeAngle = 0;
+var wormholeTransitionDirection = 1;
+var wormholeTransitionInProgress = false;
 var wormholeTransition = 0;
 var wormhole_x, wormhole_y;
 var wormholeEnabled = false; 
 var wormhole_last = 0;
 var wormholeSize = 150;
+var wormholeCloseTimer;
 
 var transitionDirection = 1;
 var transitionValue = 0;
@@ -116,7 +119,7 @@ function onLoad() {
 	
 	wormhole = new Image();
 	wormhole.src = "images/wormhole.png";
-	wormhole_last = new Date().getTime();
+	//wormhole_last = new Date().getTime();
 	
 	render();
 	   
@@ -184,16 +187,21 @@ function render() {
 	
 	if(new Date().getTime() - wormhole_last > 10000) {
 		wormholeTransition = 0;
+		wormholeTransitionInProgress = true;
+		wormholeTransitionDirection = 0;
 		wormhole_x = 50 + Math.random() * (canvas.width - 50);
 		wormhole_y = 50 + Math.random() * (canvas.height - 50);
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
+		
+		wormholeCloseTimer = setTimeout("closeWormhole()", 7000);
 	}
 	
-	if(wormholeTransition < wormholeSize) {
-		wormholeTransition += 0.7;
+	if(wormholeTransitionInProgress) {
+		wormholeTransition = wormholeTransitionDirection == 0 ? wormholeTransition + 1 : wormholeTransition - 1;
+		if(wormholeTransitionDirection == 0  && wormholeTransition > wormholeSize - 1) 	wormholeTransitionInProgress = false;
+		if(wormholeTransitionDirection == 1  && wormholeTransition < 1) wormholeEnabled = wormholeTransitionInProgress = false;
 	}
-	
 
 	
 	falcon_fa -= keys[37] == true ? 5 : 0;
@@ -219,6 +227,9 @@ function render() {
 	//Transition
 	if(transitionInProgress) {
 		transitionValue = transitionDirection == 1 ? transitionValue + 0.05 : transitionValue - 0.05;
+		falcon_w = transitionDirection == 1 ? falcon_w - 5 : falcon_w + 5;
+		falcon_h = transitionDirection == 1 ? falcon_h - 5 : falcon_h + 5; //There might be a problem here if frames are skipped? (resizing the falcon back to normal), add reset width and height to original values when transition is complete
+		
 		drawBlackBG(transitionValue);
 		if(transitionValue < 0.01) transitionInProgress = false;
 		if(transitionValue > 0.99) {
@@ -253,7 +264,7 @@ function drawBackground() {
 function drawWormhole() {
 	ctx.save();
 	ctx.translate(wormhole_x,  wormhole_y);
-	ctx.rotate(wormholeAngle+=0.4 * Math.PI/180);
+	ctx.rotate(wormholeAngle += 0.4  * Math.PI/180);
 	ctx.drawImage(wormhole, -wormholeTransition/2, -wormholeTransition/2, wormholeTransition, wormholeTransition);
 	ctx.restore();
 	
@@ -452,6 +463,7 @@ function render_objects() {
 			transitionInProgress = true;
 			transitionDirection = 1;
 			
+			clearInterval(wormholeCloseTimer);
 	}
 
 	
@@ -488,6 +500,10 @@ function move() {
 	
 }
 
+function closeWormhole() {
+	wormholeTransitionDirection = 1;
+	wormholeTransitionInProgress = true;
+}
 
 function drawBlackBG(a) {
 	ctx.globalAlpha = a;
