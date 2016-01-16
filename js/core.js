@@ -55,7 +55,7 @@ var wormholeTransitionInProgress = false;
 var wormholeTransition = 0;
 var wormhole_x, wormhole_y;
 var wormholeEnabled = false; 
-var wormhole_last = 10000;
+var wormhole_last = 20000;
 var wormholeSize = 150;
 var wormholeCloseTimer;
 var wormholeImg = 0;
@@ -122,7 +122,7 @@ function onLoad() {
 	wormhole[0].src = "images/wormhole1.png";
 	wormhole[1] = new Image();
 	wormhole[1].src = "images/wormhole2.png";
-	//wormhole_last = new Date().getTime();
+	wormhole_last = new Date().getTime(); //needed for initial delay of wormhole
 	
 	render();
 	   
@@ -188,12 +188,12 @@ function render() {
 		meteor_shower();
 	}
 	
-	if(new Date().getTime() - wormhole_last > 10000) {
+	if(new Date().getTime() - wormhole_last > 20000) {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
-		wormhole_x = 50 + Math.random() * (canvas.width - 100);
-		wormhole_y = 50 + Math.random() * (canvas.height - 100);
+		wormhole_x = 50 + Math.random() * (canvas.width - 120);
+		wormhole_y = 50 + Math.random() * (canvas.height - 120);
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
 		wormholeImg = Math.floor(Math.random() * 2);
