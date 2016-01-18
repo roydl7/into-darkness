@@ -21,7 +21,7 @@ var falcon_w = 100, falcon_h = 100;
 var falcon_x, falcon_y;
 var falcon_vx = 0, falcon_vy = 0;
 var falcon_tvx = 0, falcon_tvy = 0;
-var falcon_fa = 90;
+var falcon_fa = 90, falcon_tfa = 90;
 
 //Objects
 var bullets = [];
@@ -48,6 +48,8 @@ var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
+
+var engineOn = true;
 
 var wormholeAngle = 0;
 var wormholeTransitionDirection = 1;
@@ -208,10 +210,10 @@ function render() {
 
 	
 	falcon_fa -= keys[37] == true ? 5 : 0;
-		falcon_fa = falcon_fa < -360 ? 0 : falcon_fa;
+		falcon_tfa = falcon_fa = falcon_fa < -360 ? 0 : falcon_fa;
 	
 	falcon_fa += keys[39] == true ? 5 : 0;
-		falcon_fa = falcon_fa > 360 ? 0 : falcon_fa;
+		falcon_tfa = falcon_fa = falcon_fa > 360 ? 0 : falcon_fa;
 	
 	
 	if(keys[38] == true) {
@@ -223,7 +225,9 @@ function render() {
 	
 	move();
 	drawBackground();
+	
 	if(wormholeEnabled) drawWormhole();
+	
 	drawFalcon();
 	render_objects();
 	
@@ -239,8 +243,9 @@ function render() {
 			background.src = "images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
 			transitionDirection = 0;
 			
-			for(var i = 0; i < asteroids.length; i++) asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
-			for(var i = 0; i < meteors.length; i++) meteors.splice(meteors.indexOf(meteors[i]), 1);
+			asteroids.splice(0, asteroids.length);
+			meteors.splice(0, meteors.length);
+		
 		}
 	}
 	
@@ -278,7 +283,7 @@ function drawFalcon() {
 	ctx.save();
 	ctx.translate(falcon_x, falcon_y);
 	ctx.rotate((falcon_fa - 90) * Math.PI/180);
-	ctx.drawImage(keys[38] == true ? falcon2 : falcon, -falcon_w/2, -falcon_h/2, falcon_w, falcon_h);
+	ctx.drawImage(keys[38] == true && engineOn ? falcon2 : falcon, -falcon_w/2, -falcon_h/2, falcon_w, falcon_h);
 	ctx.restore();
 	
 }
@@ -347,12 +352,15 @@ function render_objects() {
 		ctx.drawImage(meteorsprite[meteors[i].type], sx, sy, 512, 512, meteors[i].x - 48, meteors[i].y - 48, 96, 96);
 
 		
+		var current_meteor_status = true;
+		
+		
 		if(isOutOfBounds(meteors[i].x, meteors[i].y)) {
 			var index = meteors.indexOf(meteors[i]);
 			meteors.splice(index, 1);
+			continue;
 		}
 		
-		var current_meteor_status = true;
 		//Bullet-Meteor Collision
 		for(var j = 0; j < bullets.length; j++) {
 			current_meteor_status = true;
@@ -484,6 +492,8 @@ function render_objects() {
 
 function accelerate() {
 	
+	if(!engineOn) return;
+	
 	//get target x-velocity & y-velocity
 	falcon_tvx = -acc * Math.cos(falcon_fa * Math.PI/180);
 	falcon_tvy = -acc * Math.sin(falcon_fa * Math.PI/180);
@@ -496,10 +506,15 @@ function accelerate() {
 	
 }
 
+
+
 function move() {
 	
 	falcon_x += falcon_vx;
 	falcon_y += falcon_vy;
+	
+//	if(falcon_fa != falcon_tfa) falcon_fa += falcon_tfa < falcon_fa ? 2: -2;
+
 	
 }
 
@@ -517,12 +532,20 @@ function drawBlackBG(a) {
 
 
 function checkBounds() {
+		
+	var hit = false;
 	if(falcon_x > canvas.width - falcon_w/2 || falcon_x < falcon_w/2) {
 		falcon_vx = -falcon_vx;
+		hit = true;
 	} 	
 	
 	if(falcon_y > canvas.height - falcon_h/2 || falcon_y < falcon_h/2)	{
-			falcon_vy = -falcon_vy;
+		falcon_vy = -falcon_vy;
+		hit = true;
+	}
+	if(hit) {
+		engineOn = false;
+		setTimeout(function() { engineOn = true; }, 150);
 	}
 }
 
@@ -541,6 +564,28 @@ function debug() {
 	ctx.fillText("a: " + Math.round(falcon_fa, 2) + " x: " + Math.round(falcon_x, 2) + " y: " + Math.round(falcon_y, 2) + " vx: " + Math.round(falcon_vx, 2) + " vy: " + Math.round(falcon_vy, 2) + " tvx: " + Math.round(falcon_tvx, 2) + " tvy: " + Math.round(falcon_tvy, 2), 10, 40);
 	ctx.fillText("bullets: " + bullets.length + " asteroids: " + asteroids.length,10, 60);
 	ctx.fillText("fps: " + Math.round(fps, 0),10, 80);
+	
+	var meteorString = "";
+	for(var i = 0; i < asteroids.length; i++) {
+		if(i > 0) meteorString += ", ";
+		meteorString += "" + i;
+	}
+	ctx.fillText("meteors: [" + meteorString + "]",10, 100);
+	
+	var bulletString = "";
+	for(var i = 0; i < bullets.length; i++) {
+		if(i > 0) bulletString += ", ";
+		bulletString += "" + i;
+	}
+	ctx.fillText("bullets: [" + bulletString + "]",10, 120);
+	
+	var explosionString = "";
+	for(var i = 0; i < explosions.length; i++) {		
+		if(i > 0) explosionString += ", ";
+		explosionString += "" + i + " (" + explosions[i].type + "){" + explosions[i].spriteid + "}";
+	}
+	ctx.fillText("explosions: [" + explosionString + "]",10, 140);
+	
 }
 
 function drawScore() {
@@ -548,5 +593,7 @@ function drawScore() {
     ctx.fillStyle = 'lightgreen';
 	//ctx.strokeStyle = 'lightgreen';
 	ctx.fillText("Asteroids: " + stats_destroyed + "  Deaths: " + stats_deaths, canvas.width - 245, 20);
+	ctx.fillText("Players Online: " + 0, canvas.width - 245, 40
+	);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
 }
