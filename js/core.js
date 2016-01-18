@@ -229,6 +229,7 @@ function render() {
 	if(wormholeEnabled) drawWormhole();
 	
 	drawFalcon();
+	
 	render_objects();
 	
 	//Transition
