@@ -42,12 +42,18 @@ var acc = 0;
 //Stats
 var stats_destroyed = 0;
 var stats_deaths = 0;
+var stats_gameStartAt = 0;
+var stats_timeAlive = 0;
 
 //System
+var gameStarted = false;
+var gameOver = false;
 var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
+
+var start;
 
 var engineOn = true;
 
@@ -74,6 +80,17 @@ function onLoad() {
 	ctx = canvas.getContext("2d");
 	
 	document.addEventListener("keydown", function(e) {
+		if(!gameStarted) {
+			if(!gameOver) {
+				transitionInProgress = true;
+				transitionDirection = 1;
+				gameStarted = true;
+				stats_deaths = stats_destroyed = 0;
+				stats_gameStartAt = new Date().getTime();
+			} else {
+				gameOver = false;
+			}
+		}
 		keys[e.keyCode] = true;
 		if(e.keyCode == 32) {
 					if(new Date().getTime() - last_shot > 180 ) {	
@@ -126,6 +143,15 @@ function onLoad() {
 	wormhole[1].src = "images/wormhole2.png";
 	wormhole_last = new Date().getTime(); //needed for initial delay of wormhole
 	
+	
+	start = new Image();
+	start.src = "images/start.png";
+	gameStarted = false;
+	
+	end = new Image(); 
+	end.src = "images/end.png";
+	
+	
 	render();
 	   
 }
@@ -177,6 +203,7 @@ function meteor_shower() {
 
 
 function render() {
+	
 	requestAnimationFrame(render);
 	
 	
@@ -251,6 +278,33 @@ function render() {
 	}
 	
 	drawScore();
+	
+	if(!gameStarted) 
+	{
+		ctx.globalAlpha = 0.3;
+		ctx.drawImage(background, - 5, -5);
+		ctx.drawImage(background, - 3, -3);
+		ctx.drawImage(background, 0, 0);
+		ctx.drawImage(background, -11, -9);
+		ctx.drawImage(background, -10, -10);
+		ctx.globalAlpha = 1;
+		
+		if(!gameOver) {
+			ctx.drawImage(start, 0, 0, canvas.width, canvas.height);
+		} else {
+
+			ctx.drawImage(end, 0, 0, canvas.width, canvas.height);
+			ctx.font = 'bold 35pt Arial';
+			ctx.fillStyle = 'red';
+			ctx.textAlign = "center"; 
+			ctx.fillText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
+			ctx.fillText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
+			ctx.textAlign = "left"; 
+		} 
+			
+			
+	}
+	
 	
 	debug();
 
@@ -409,6 +463,8 @@ function render_objects() {
 				meteors.splice(meteors.indexOf(meteors[i]), 1);
 				
 				stats_deaths++;
+				
+				onFalconDeath();
 				break;
 		}
 		
@@ -463,6 +519,7 @@ function render_objects() {
 				asteroids.splice(asteroids.indexOf(asteroids[i]), 1);
 				
 				stats_deaths++;
+				onFalconDeath();
 				break;
 		}
 		
@@ -556,6 +613,15 @@ function isOutOfBounds(x, y) {
 
 function inRange(x, y, px, py, radius) {
 	return (x > px - radius && x < px + radius && y > py - radius && y < py + radius);
+}
+
+function onFalconDeath() {
+	
+	gameStarted = false;
+	if(!gameOver) stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
+	gameOver = true;
+
+		
 }
 
 function debug() {

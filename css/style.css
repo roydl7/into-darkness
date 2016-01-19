@@ -1,7 +1,12 @@
+body {
+	background: black;
+	overflow: none;
+}
+
 #game {
 	margin: auto; 
+	width: 99%;
 	display: block; 
-	border: 1px solid black;
 }
 
 #cv-footer {
