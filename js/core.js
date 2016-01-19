@@ -306,7 +306,7 @@ function render() {
 	}
 	
 	
-	debug();
+	//debug();
 
 	delta = (new Date().getTime() - lastCalledTime)/1000;
 	if(new Date().getTime() - lastFPSUpdate > 100) {
@@ -616,11 +616,14 @@ function inRange(x, y, px, py, radius) {
 }
 
 function onFalconDeath() {
-	
-	gameStarted = false;
-	if(!gameOver) stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
-	gameOver = true;
-
+	if(gameStarted) {
+		gameStarted = false;
+		if(!gameOver) stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
+		gameOver = true;
+		falcon_x = 0;
+		falcon_y = 0;
+		falcon_fa = 90;
+	}
 		
 }
 
