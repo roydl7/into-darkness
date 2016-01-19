@@ -46,6 +46,7 @@ var stats_gameStartAt = 0;
 var stats_timeAlive = 0;
 
 //System
+var debugEnabled = false;
 var gameStarted = false;
 var gameOver = false;
 var keys = [];
@@ -306,7 +307,7 @@ function render() {
 	}
 	
 	
-	//debug();
+	if(debugEnabled) debug();
 
 	delta = (new Date().getTime() - lastCalledTime)/1000;
 	if(new Date().getTime() - lastFPSUpdate > 100) {
@@ -388,7 +389,7 @@ function render_objects() {
 		ctx.drawImage(asteroids[i].img, asteroids[i].x - current_asteroid_radius, asteroids[i].y - current_asteroid_radius, current_asteroid_radius * 2, current_asteroid_radius * 2);
 		
 		ctx.font = '10pt Courier New';
-		ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1), asteroids[i].x, asteroids[i].y);
+		if(debugEnabled) ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1), asteroids[i].x, asteroids[i].y);
 		
 		if(isOutOfBounds(asteroids[i].x, asteroids[i].y)) {
 			var index = asteroids.indexOf(asteroids[i]);
@@ -620,8 +621,8 @@ function onFalconDeath() {
 		gameStarted = false;
 		if(!gameOver) stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
 		gameOver = true;
-		falcon_x = 0;
-		falcon_y = 0;
+		falcon_x = canvas.width/2;
+		falcon_y = canvas.height/2;
 		falcon_fa = 90;
 	}
 		
