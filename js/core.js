@@ -218,12 +218,12 @@ function render() {
 		meteor_shower();
 	}
 	
-	if(new Date().getTime() - wormhole_last > 20000) {
+	if(new Date().getTime() - wormhole_last > 20000 && gameStarted) {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
-		wormhole_x = 50 + Math.random() * (canvas.width - 120);
-		wormhole_y = 50 + Math.random() * (canvas.height - 120);
+		wormhole_x = 100 + (Math.random() * (canvas.width - 200));
+		wormhole_y = 100 + (Math.random() * (canvas.height - 200));
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
 		wormholeImg = Math.floor(Math.random() * 2);
