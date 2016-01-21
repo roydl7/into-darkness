@@ -22,6 +22,14 @@ switch($action) {
 							echo json_encode($data);
 						}
 					}
+	case "sfetch":	$query = "SELECT * FROM `scores` WHERE `userid` = " . $userid;
+					if($conn -> query($query) === TRUE) {
+						if($result -> num_rows) {
+							data = array();
+							$row = $result -> fetch_array();
+							echo json_encode($data);
+						}
+					}
 }
 
 
