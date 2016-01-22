@@ -54,6 +54,8 @@ var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
 
+var tek_email = "user@user.com", tek_fname = "user";
+
 var start;
 
 var engineOn = true;
@@ -99,6 +101,8 @@ function onLoad() {
 						last_shot = new Date().getTime();
 					}
 		}
+		
+		
 	});
 	
 	document.addEventListener("keyup", function(e) {
@@ -624,6 +628,9 @@ function onFalconDeath() {
 		falcon_x = canvas.width/2;
 		falcon_y = canvas.height/2;
 		falcon_fa = 90;
+		
+		
+		saveInfo();
 	}
 		
 }
@@ -667,4 +674,12 @@ function drawScore() {
 	ctx.fillText("Players Online: " + 0, canvas.width - 245, 40
 	);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+}
+
+function saveInfo()
+{
+	$.post("ajax/stats.php", { action: 'save', a_fname: tek_fname, a_email: tek_email, score: stats_destroyed, alive: stats_timeAlive },  function(data) {
+		//lol
+	});
+	
 }
