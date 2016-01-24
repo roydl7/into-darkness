@@ -664,7 +664,6 @@ function drawScore() {
     ctx.fillStyle = 'lightgreen';
 	//ctx.strokeStyle = 'lightgreen';
 	ctx.fillText("Asteroids: " + stats_destroyed + "  Deaths: " + stats_deaths, canvas.width - 245, 20);
-	ctx.fillText("Players Online: " + 0, canvas.width - 245, 40
-	);
+//	ctx.fillText("Players Online: " + 0, canvas.width - 245, 40);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
 }
