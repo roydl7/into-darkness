@@ -737,7 +737,8 @@ function onAssetLoad(e) {
 		if(!gameLoaded) {
 			gameLoaded = true;
 			$("#cv-footer").fadeIn();
-			$("#loader").css("margin-left", "0").css("margin-top", "0").css("left", "10").css("bottom", "0").css("top", "auto").css("opacity", "0.6");
+			$("#loader").css("opacity", "0.6").animate({'top': '95%', 'opacity': '0'}, { complete: function() { $(this).css('top', 'auto').animate({'opacity': '0.8', 'margin-left': 0, 'margin-top': 0, 'left':10, 'bottom':0 }, 500); }});
+
 		}
 		
 		if(preLoadBackgrounds < maxBackgroundsIMG) {
@@ -755,7 +756,7 @@ function onAssetLoad(e) {
 	
 	if(assetsLoaded >= maxBackgroundsIMG + maxAsteroidsIMG) {
 		
-		$("#loader").fadeOut();
+		setTimeout(function() { $("#loader").fadeOut(); }, 2500);
 	}
 	
 }
