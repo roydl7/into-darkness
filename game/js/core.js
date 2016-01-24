@@ -737,6 +737,7 @@ function onAssetLoad(e) {
 		if(!gameLoaded) {
 			gameLoaded = true;
 			$("#cv-footer").fadeIn();
+			$("#loader").css("margin-left", "0").css("margin-top", "0").css("left", "10").css("bottom", "0").css("top", "auto").css("opacity", "0.6");
 		}
 		
 		if(preLoadBackgrounds < maxBackgroundsIMG) {
