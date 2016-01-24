@@ -724,7 +724,7 @@ function saveInfo()
 
 function onAssetLoad(e) {
 	//console.log(e);
-	$("#loadertext").text("Loading Assets: " + (++assetsLoaded/13 * 100));
+	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/13 * 100));
 	
   
 	if(assetsLoaded >= 13) {
