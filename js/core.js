@@ -54,6 +54,8 @@ var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
 
+var tek_email = "user@user.com", tek_fname = "user";
+
 var start;
 
 var engineOn = true;
@@ -99,6 +101,8 @@ function onLoad() {
 						last_shot = new Date().getTime();
 					}
 		}
+		
+		
 	});
 	
 	document.addEventListener("keyup", function(e) {
@@ -218,12 +222,12 @@ function render() {
 		meteor_shower();
 	}
 	
-	if(new Date().getTime() - wormhole_last > 20000) {
+	if(new Date().getTime() - wormhole_last > 20000 && gameStarted) {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
-		wormhole_x = 50 + Math.random() * (canvas.width - 120);
-		wormhole_y = 50 + Math.random() * (canvas.height - 120);
+		wormhole_x = 100 + (Math.random() * (canvas.width - 200));
+		wormhole_y = 100 + (Math.random() * (canvas.height - 200));
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
 		wormholeImg = Math.floor(Math.random() * 2);
@@ -624,6 +628,9 @@ function onFalconDeath() {
 		falcon_x = canvas.width/2;
 		falcon_y = canvas.height/2;
 		falcon_fa = 90;
+		
+		
+		saveInfo();
 	}
 		
 }
@@ -666,4 +673,12 @@ function drawScore() {
 	ctx.fillText("Asteroids: " + stats_destroyed + "  Deaths: " + stats_deaths, canvas.width - 245, 20);
 //	ctx.fillText("Players Online: " + 0, canvas.width - 245, 40);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+}
+
+function saveInfo()
+{
+	$.post("ajax/stats.php", { action: 'save', a_fname: tek_fname, a_email: tek_email, score: stats_destroyed, alive: stats_timeAlive },  function(data) {
+		//lol
+	});
+	
 }
