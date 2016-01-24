@@ -757,6 +757,5 @@ function onAssetLoad(e) {
 		
 		$("#loader").fadeOut();
 	}
-	$("#loader").fadeOut();
 	
 }
