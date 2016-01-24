@@ -2,6 +2,10 @@ var ver = "0.1a r8"
 var canvas;
 var ctx;
 
+//Const
+var maxBackgroundsIMG = 15;
+var maxAsteroidsIMG = 64; 
+
 //Images
 var falcon, falcon2;
 var background;
@@ -57,6 +61,8 @@ var sound_muted = false;
 var defaultAlpha = 0.7; 
 var assetsLoaded = 0;
 var gameLoaded = false;
+var preLoadBackgrounds = 0, preLoadAsteroids = 0;
+
 
 var tek_email = "user@user.com", tek_fname = "user";
 
@@ -139,7 +145,7 @@ function onLoad() {
 		
 	background = document.createElement("img");
 	background.onload = onAssetLoad;
-	background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * 15) + ".jpg";
+	background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * maxBackgroundsIMG) + ".jpg";
 	
 	falcon = new Image();
 	falcon.onload = onAssetLoad;
@@ -200,7 +206,7 @@ function asteroid_belt() {
 		var ay = Math.floor(Math.random() * canvas.height);
 		var aa = 110 - Math.floor(Math.random() * 150);
 		var af = new Image();
-		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
+		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * maxAsteroidsIMG)) + ").png";
 		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
@@ -210,7 +216,7 @@ function asteroid_belt() {
 		var ay = Math.floor(Math.random() * canvas.height);
 		var aa = 240 - Math.floor(Math.random() * 150);
 		var af = new Image();
-		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
+		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * maxAsteroidsIMG)) + ").png";
 		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
@@ -306,7 +312,7 @@ function render() {
 		drawBlackBG(transitionValue);
 		if(transitionValue < 0.01) transitionInProgress = false;
 		if(transitionValue > 0.99) {
-			background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
+			background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * maxBackgroundsIMG) + ".jpg";
 			transitionDirection = 0;
 			
 			asteroids.splice(0, asteroids.length);
@@ -724,12 +730,32 @@ function saveInfo()
 
 function onAssetLoad(e) {
 	//console.log(e);
-	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/13 * 100));
+	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/(13 + maxAsteroidsIMG + maxBackgroundsIMG) * 100) + "%");
 	
   
 	if(assetsLoaded >= 13) {
-		gameLoaded = true;
+		if(!gameLoaded) {
+			gameLoaded = true;
+			$("#cv-footer").fadeIn();
+		}
+		
+		if(preLoadBackgrounds < maxBackgroundsIMG) {
+			var img0 = new Image();
+			img0.src = "game/images/backgrounds/background" + (preLoadBackgrounds++) + ".jpg";
+			img0.onload = onAssetLoad;
+		}
+		
+		if(preLoadAsteroids < maxAsteroidsIMG) {
+			var img1 = new Image();
+			img1.src = "game/images/asteroids/asteroid (" + (preLoadAsteroids++) + ").png";
+			img1.onload = onAssetLoad;
+		}
+	}
+	
+	if(assetsLoaded >= maxBackgroundsIMG + maxAsteroidsIMG) {
+		
 		$("#loader").fadeOut();
 	}
+	$("#loader").fadeOut();
 	
 }

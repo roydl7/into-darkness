@@ -15,6 +15,7 @@ body {
 	position: fixed;
 	top: 92%;
 	right: 5%;
+	display: none;
 }
 
 .cv-footer-btn
