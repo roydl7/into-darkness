@@ -22,6 +22,7 @@ var falcon_x, falcon_y;
 var falcon_vx = 0, falcon_vy = 0;
 var falcon_tvx = 0, falcon_tvy = 0;
 var falcon_fa = 90, falcon_tfa = 90;
+var falconEnabled = false;
 
 //Objects
 var bullets = [];
@@ -53,6 +54,7 @@ var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
+var defaultAlpha = 0.7; 
 
 var tek_email = "user@user.com", tek_fname = "user";
 
@@ -71,9 +73,15 @@ var wormholeSize = 150;
 var wormholeCloseTimer;
 var wormholeImg = 0;
 
+//Wormhole Transition
 var transitionDirection = 1;
 var transitionValue = 0;
 var transitionInProgress = false;
+
+//Global Transition
+var globalTransitionDirection = 1;
+var globalTransitionValue = 0;
+var globalTransitionInProgress = false;
 
 window.addEventListener("load", onLoad);
 
@@ -85,8 +93,12 @@ function onLoad() {
 	document.addEventListener("keydown", function(e) {
 		if(!gameStarted) {
 			if(!gameOver) {
-				transitionInProgress = true;
-				transitionDirection = 1;
+				falcon_x = canvas.width/2;
+				falcon_y = canvas.height/2;
+				falcon_fa = 90;
+				falconEnabled = true;
+				globalTransitionInProgress = true;
+				globalTransitionDirection = 1;
 				gameStarted = true;
 				stats_deaths = stats_destroyed = 0;
 				stats_gameStartAt = new Date().getTime();
@@ -260,11 +272,11 @@ function render() {
 	
 	if(wormholeEnabled) drawWormhole();
 	
-	drawFalcon();
+	if(falconEnabled) drawFalcon();
 	
 	render_objects();
 	
-	//Transition
+	//Wormhole Transition
 	if(transitionInProgress) {
 		transitionValue = transitionDirection == 1 ? transitionValue + 0.05 : transitionValue - 0.05;
 		falcon_w = transitionDirection == 1 ? falcon_w - 5 : falcon_w + 5;
@@ -282,17 +294,26 @@ function render() {
 		}
 	}
 	
+	//GLOBAL Transition
+	if(globalTransitionInProgress) {
+		globalTransitionValue = globalTransitionDirection == 1 ? globalTransitionValue + 0.05 : globalTransitionValue - 0.05;
+		drawBlackBG(globalTransitionValue);
+		if(globalTransitionValue < 0.01) globalTransitionInProgress = false;
+		if(globalTransitionValue > 0.99) globalTransitionDirection = 0;
+	}
+	
+	
 	drawScore();
 	
 	if(!gameStarted) 
 	{
-		ctx.globalAlpha = 0.3;
-		ctx.drawImage(background, - 5, -5);
-		ctx.drawImage(background, - 3, -3);
+		ctx.globalAlpha = 0.01;
+		ctx.drawImage(background, 0, 2);
+		ctx.drawImage(background, 0, 1);
 		ctx.drawImage(background, 0, 0);
-		ctx.drawImage(background, -11, -9);
-		ctx.drawImage(background, -10, -10);
-		ctx.globalAlpha = 1;
+		ctx.drawImage(background, 0, -1);
+		ctx.drawImage(background, 0, -2);
+		ctx.globalAlpha = defaultAlpha;
 		
 		if(!gameOver) {
 			ctx.drawImage(start, 0, 0, canvas.width, canvas.height);
@@ -449,7 +470,7 @@ function render_objects() {
 		if(!current_meteor_status) continue;
 		
 		//Falcon-Meteor Collision
-		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30)) {
+		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30) && falconEnabled) {
 				
 				
 				falcon_vx = 0;
@@ -506,7 +527,7 @@ function render_objects() {
 		if(!current_asteroid_status) continue;
 		
 		//Falcon-Asteroid Collision
-		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size)) {
+		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size) && falconEnabled) {
 				
 				falcon_vx = 0;
 				falcon_vy = 0;
@@ -576,7 +597,6 @@ function move() {
 	falcon_x += falcon_vx;
 	falcon_y += falcon_vy;
 	
-//	if(falcon_fa != falcon_tfa) falcon_fa += falcon_tfa < falcon_fa ? 2: -2;
 
 	
 }
@@ -590,7 +610,7 @@ function drawBlackBG(a) {
 	ctx.globalAlpha = a;
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	ctx.globalAlpha = 1;
+	ctx.globalAlpha = defaultAlpha;
 }
 
 
@@ -621,18 +641,23 @@ function inRange(x, y, px, py, radius) {
 }
 
 function onFalconDeath() {
-	if(gameStarted) {
-		gameStarted = false;
-		if(!gameOver) stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
-		gameOver = true;
-		falcon_x = canvas.width/2;
-		falcon_y = canvas.height/2;
-		falcon_fa = 90;
+	falconEnabled = false;
+	stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
+	saveInfo();
+	
+	setTimeout(function () {
+		globalTransitionInProgress = true;
+		globalTransitionDirection = 1;
+		setTimeout("gameOverOverlay()", 400);
+	}, 1000);
+	
 		
-		
-		saveInfo();
-	}
-		
+}
+
+
+function gameOverOverlay() {
+	gameStarted = false;
+	gameOver = true;
 }
 
 function debug() {
