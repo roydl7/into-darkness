@@ -1,17 +1,22 @@
+<html>
 <head>
-<link rel="stylesheet" href="game/css/style.css"></link>
-<script src="js/jquery-2.1.4.min.js"></script>
-<script src="game/js/core.js"></script>
-<script src="game/js/interface.js"></script>
-
-
+	<link rel="stylesheet" href="css/home.css"></link>
+	<script src="js/jquery-2.1.4.min.js"></script>
 </head>
-<body>
-<canvas id="game"></canvas>
-<div id="cv-footer">
-	<div id="mutebtn" class="cv-footer-btn unmute"></div>
-	<div class="cv-footer-btn"></div>
-</div>
-<div id="loader"><img src="images/loader.svg"/><span id="loadertext">Loading Assets</span></div>
+<body style="color: white;">
+	<br/>
+	<br/>
+	<div id = "main">
+		<img id = "headimg" src = "images/logo3.png"></img>
+		<br/><br/>
+		<span class = "option"><a href="game.php"><img src="images/play.png"/></a></span></br> 	
+		<span class = "option"><a href=""><img src="images/story.png"></a></span></br>
+		<span class = "option"><a href=""><img src="images/instructions.png"></a></span></br></br>
+		<span class = "option"><a href=""><img src="images/highscores.png"></a></span>
+		</div>
+	</div>
+	<video autoplay loop id="video" muted="true">
+		<source src = "media/video.webm"></source>
+	</video>
 </body>
 </html>
