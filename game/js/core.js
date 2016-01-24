@@ -4,7 +4,7 @@ var ctx;
 
 //Const
 var maxBackgroundsIMG = 15;
-var maxAsteroidsIMG = 64; 
+var maxAsteroidsIMG = 10; 
 
 //Images
 var falcon, falcon2;
