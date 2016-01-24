@@ -129,44 +129,44 @@ function onLoad() {
 	falcon_y = canvas.height/2;
 	
 	music = document.createElement("audio");
-	music.src = "audio/interstellar.mp3";
+	music.src = "game/audio/interstellar.mp3";
 	music.loop = true;
 	music.play();
 		
 	background = document.createElement("img");
-	background.src = "images/backgrounds/background" + Math.floor(Math.random() * 15) + ".jpg";
+	background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * 15) + ".jpg";
 	falcon = new Image();
-	falcon.src = "images/mfalcon.png";
+	falcon.src = "game/images/mfalcon.png";
 	falcon2 = new Image();
-	falcon2.src = "images/mfalconacc.png";
+	falcon2.src = "game/images/mfalconacc.png";
 	bullet_img = new Image();
-	bullet_img.src = "images/bullet.png";
+	bullet_img.src = "game/images/bullet.png";
 	
 	explosionsprite[0] = new Image();
-	explosionsprite[0].src = "images/explosion_sprite.png";
+	explosionsprite[0].src = "game/images/explosion_sprite.png";
 	explosionsprite[1] = new Image();
-	explosionsprite[1].src = "images/explosion2_sprite.png";
+	explosionsprite[1].src = "game/images/explosion2_sprite.png";
 	
 	
 	meteorsprite[0] = new Image();
-	meteorsprite[0].src = "images/asteroids/meteorspritedown.png";
+	meteorsprite[0].src = "game/images/asteroids/meteorspritedown.png";
 	meteorsprite[1] = new Image();
-	meteorsprite[1].src = "images/asteroids/meteorspriteup.png";
+	meteorsprite[1].src = "game/images/asteroids/meteorspriteup.png";
 	meteor_lastshower = new Date().getTime();
 	
 	wormhole[0] = new Image();
-	wormhole[0].src = "images/wormhole1.png";
+	wormhole[0].src = "game/images/wormhole1.png";
 	wormhole[1] = new Image();
-	wormhole[1].src = "images/wormhole2.png";
+	wormhole[1].src = "game/images/wormhole2.png";
 	wormhole_last = new Date().getTime(); //needed for initial delay of wormhole
 	
 	
 	start = new Image();
-	start.src = "images/start.png";
+	start.src = "game/images/start.png";
 	gameStarted = false;
 	
 	end = new Image(); 
-	end.src = "images/end.png";
+	end.src = "game/images/end.png";
 	
 	
 	render();
@@ -181,7 +181,7 @@ function asteroid_belt() {
 		var ay = Math.floor(Math.random() * canvas.height);
 		var aa = 110 - Math.floor(Math.random() * 150);
 		var af = new Image();
-		af.src = "images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
+		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
 		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
@@ -191,7 +191,7 @@ function asteroid_belt() {
 		var ay = Math.floor(Math.random() * canvas.height);
 		var aa = 240 - Math.floor(Math.random() * 150);
 		var af = new Image();
-		af.src = "images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
+		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * 64) + 1) + ").png";
 		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
@@ -285,7 +285,7 @@ function render() {
 		drawBlackBG(transitionValue);
 		if(transitionValue < 0.01) transitionInProgress = false;
 		if(transitionValue > 0.99) {
-			background.src = "images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
+			background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * 7) + ".jpg";
 			transitionDirection = 0;
 			
 			asteroids.splice(0, asteroids.length);
@@ -377,7 +377,7 @@ function shoot() {
 	
 	if(!sound_muted) {
 		sound = document.createElement("audio");
-		sound.src = "audio/pew.mp3";
+		sound.src = "game/audio/pew.mp3";
 		sound.play();
 	}
 
@@ -450,7 +450,7 @@ function render_objects() {
 		
 				if(!sound_muted) {
 					sound = document.createElement("audio");
-					sound.src = "audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
 					sound.play();
 				}
 	
@@ -478,7 +478,7 @@ function render_objects() {
 				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
-					sound.src = "audio/explosion3.mp3";
+					sound.src = "game/audio/explosion3.mp3";
 					sound.play();
 				}
 				
@@ -507,7 +507,7 @@ function render_objects() {
 		
 				if(!sound_muted) {
 					sound = document.createElement("audio");
-					sound.src = "audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
 					sound.play();
 				}
 	
@@ -534,7 +534,7 @@ function render_objects() {
 				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
-					sound.src = "audio/explosion3.mp3";
+					sound.src = "game/audio/explosion3.mp3";
 					sound.play();
 				}
 				
@@ -575,7 +575,6 @@ function render_objects() {
 
 
 function accelerate() {
-	
 	if(!engineOn) return;
 	
 	//get target x-velocity & y-velocity
@@ -587,18 +586,13 @@ function accelerate() {
 		falcon_vx += falcon_vx < falcon_tvx ? 0.2: -0.2;
 		falcon_vy += falcon_vy < falcon_tvy ? 0.2: -0.2;
 	}
-	
 }
 
 
 
 function move() {
-	
 	falcon_x += falcon_vx;
 	falcon_y += falcon_vy;
-	
-
-	
 }
 
 function closeWormhole() {
@@ -615,7 +609,6 @@ function drawBlackBG(a) {
 
 
 function checkBounds() {
-		
 	var hit = false;
 	if(falcon_x > canvas.width - falcon_w/2 || falcon_x < falcon_w/2) {
 		falcon_vx = -falcon_vx;
