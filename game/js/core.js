@@ -55,6 +55,8 @@ var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
 var defaultAlpha = 0.7; 
+var assetsLoaded = 0;
+var gameLoaded = false;
 
 var tek_email = "user@user.com", tek_fname = "user";
 
@@ -91,30 +93,31 @@ function onLoad() {
 	ctx = canvas.getContext("2d");
 	
 	document.addEventListener("keydown", function(e) {
-		if(!gameStarted) {
-			if(!gameOver) {
-				falcon_x = canvas.width/2;
-				falcon_y = canvas.height/2;
-				falcon_fa = 90;
-				falconEnabled = true;
-				globalTransitionInProgress = true;
-				globalTransitionDirection = 1;
-				gameStarted = true;
-				stats_deaths = stats_destroyed = 0;
-				stats_gameStartAt = new Date().getTime();
-			} else {
-				gameOver = false;
+		
+		if(gameLoaded) {
+			if(!gameStarted) {
+				if(!gameOver) {
+					falcon_x = canvas.width/2;
+					falcon_y = canvas.height/2;
+					falcon_fa = 90;
+					falconEnabled = true;
+					globalTransitionInProgress = true;
+					globalTransitionDirection = 1;
+					gameStarted = true;
+					stats_deaths = stats_destroyed = 0;
+					stats_gameStartAt = new Date().getTime();
+				} else {
+					gameOver = false;
+				}
+			}
+			keys[e.keyCode] = true;
+			if(e.keyCode == 32) {
+				if(new Date().getTime() - last_shot > 180 ) {	
+					shoot();
+					last_shot = new Date().getTime();
+				}
 			}
 		}
-		keys[e.keyCode] = true;
-		if(e.keyCode == 32) {
-					if(new Date().getTime() - last_shot > 180 ) {	
-						shoot();
-						last_shot = new Date().getTime();
-					}
-		}
-		
-		
 	});
 	
 	document.addEventListener("keyup", function(e) {
@@ -130,42 +133,58 @@ function onLoad() {
 	
 	music = document.createElement("audio");
 	music.src = "game/audio/interstellar.mp3";
+	music.oncanplaythrough = onAssetLoad;
 	music.loop = true;
 	music.play();
 		
 	background = document.createElement("img");
+	background.onload = onAssetLoad;
 	background.src = "game/images/backgrounds/background" + Math.floor(Math.random() * 15) + ".jpg";
+	
 	falcon = new Image();
+	falcon.onload = onAssetLoad;
 	falcon.src = "game/images/mfalcon.png";
+	
 	falcon2 = new Image();
+	falcon2.onload = onAssetLoad;
 	falcon2.src = "game/images/mfalconacc.png";
+	
 	bullet_img = new Image();
+	bullet_img.onload = onAssetLoad;
 	bullet_img.src = "game/images/bullet.png";
 	
 	explosionsprite[0] = new Image();
+	explosionsprite[0].onload = onAssetLoad;
 	explosionsprite[0].src = "game/images/explosion_sprite.png";
 	explosionsprite[1] = new Image();
+	explosionsprite[1].onload = onAssetLoad;
 	explosionsprite[1].src = "game/images/explosion2_sprite.png";
 	
 	
 	meteorsprite[0] = new Image();
+	meteorsprite[0].onload = onAssetLoad;
 	meteorsprite[0].src = "game/images/asteroids/meteorspritedown.png";
 	meteorsprite[1] = new Image();
+	meteorsprite[1].onload = onAssetLoad;
 	meteorsprite[1].src = "game/images/asteroids/meteorspriteup.png";
 	meteor_lastshower = new Date().getTime();
 	
 	wormhole[0] = new Image();
+	wormhole[0].onload = onAssetLoad;
 	wormhole[0].src = "game/images/wormhole1.png";
 	wormhole[1] = new Image();
+	wormhole[1].onload = onAssetLoad;
 	wormhole[1].src = "game/images/wormhole2.png";
 	wormhole_last = new Date().getTime(); //needed for initial delay of wormhole
 	
 	
 	start = new Image();
+	start.onload = onAssetLoad;
 	start.src = "game/images/start.png";
 	gameStarted = false;
 	
 	end = new Image(); 
+	end.onload = onAssetLoad;
 	end.src = "game/images/end.png";
 	
 	
@@ -222,6 +241,8 @@ function meteor_shower() {
 function render() {
 	
 	requestAnimationFrame(render);
+	
+	if(!gameLoaded) return;
 	
 	
 	checkBounds();
@@ -698,5 +719,17 @@ function saveInfo()
 	$.post("ajax/stats.php", { action: 'save', a_fname: tek_fname, a_email: tek_email, score: stats_destroyed, alive: stats_timeAlive },  function(data) {
 		//lol
 	});
+	
+}
+
+function onAssetLoad(e) {
+	//console.log(e);
+	$("#loadertext").text("Loading Assets: " + (++assetsLoaded/13 * 100));
+	
+  
+	if(assetsLoaded >= 13) {
+		gameLoaded = true;
+		$("#loader").fadeOut();
+	}
 	
 }
