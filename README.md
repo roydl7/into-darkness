@@ -7,5 +7,4 @@ PULL -> EDIT -> PUSH
 
 Enjoy !!!
 
-Live Demo
-https://royst.in/iddemo/into-darkness/
+
