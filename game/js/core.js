@@ -1,4 +1,4 @@
-var ver = "0.1a r8"
+var ver = "0.1a r1228"
 var canvas;
 var ctx;
 
@@ -27,6 +27,7 @@ var falcon_vx = 0, falcon_vy = 0;
 var falcon_tvx = 0, falcon_tvy = 0;
 var falcon_fa = 90, falcon_tfa = 90;
 var falconEnabled = false;
+var falconInvincible = false;
 
 //Objects
 var bullets = [];
@@ -49,6 +50,7 @@ var stats_destroyed = 0;
 var stats_deaths = 0;
 var stats_gameStartAt = 0;
 var stats_timeAlive = 0;
+var stats_lives = 3;
 
 //System
 var debugEnabled = false;
@@ -58,7 +60,7 @@ var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
 var sound_muted = false;
-var defaultAlpha = 0.7; 
+var defaultAlpha = 0.9; 
 var assetsLoaded = 0;
 var gameLoaded = false;
 var preLoadBackgrounds = 0, preLoadAsteroids = 0;
@@ -111,6 +113,7 @@ function onLoad() {
 					globalTransitionDirection = 1;
 					gameStarted = true;
 					stats_deaths = stats_destroyed = 0;
+					stats_lives = 3;
 					stats_gameStartAt = new Date().getTime();
 				} else {
 					gameOver = false;
@@ -278,7 +281,6 @@ function render() {
 		if(wormholeTransitionDirection == 0  && wormholeTransition > wormholeSize - 1) 	wormholeTransitionInProgress = false;
 		if(wormholeTransitionDirection == 1  && wormholeTransition < 1) wormholeEnabled = wormholeTransitionInProgress = false;
 	}
-
 	
 	falcon_fa -= keys[37] == true ? 5 : 0;
 		falcon_tfa = falcon_fa = falcon_fa < -360 ? 0 : falcon_fa;
@@ -298,6 +300,8 @@ function render() {
 	drawBackground();
 	
 	if(wormholeEnabled) drawWormhole();
+
+	if(falconInvincible && new Date().getTime()%5 == 0) falconEnabled = !falconEnabled;
 	
 	if(falconEnabled) drawFalcon();
 	
@@ -331,6 +335,7 @@ function render() {
 	
 	
 	drawScore();
+	drawLives();
 	
 	if(!gameStarted) 
 	{
@@ -352,6 +357,7 @@ function render() {
 			ctx.textAlign = "center"; 
 			ctx.fillText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
 			ctx.fillText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
+			ctx.fillText("Points Scored: " + Math.ceil((Math.round(stats_timeAlive)/60)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
 			ctx.textAlign = "left"; 
 		} 
 			
@@ -407,14 +413,9 @@ function shoot() {
 		sound.src = "game/audio/pew.mp3";
 		sound.play();
 	}
-
-
 }
 
 function render_objects() {
-	
-	
-	
 	for(var i = 0; i < bullets.length; i++) {
 		bullets[i].x = bullets[i].x - 5* Math.cos(bullets[i].angle * Math.PI/180);
 		bullets[i].y = bullets[i].y - 5* Math.sin(bullets[i].angle * Math.PI/180);
@@ -430,8 +431,7 @@ function render_objects() {
 			var index = bullets.indexOf(bullets[i]);
 			bullets.splice(index, 1);
 		}
-	
-	} 
+	}
 	
 	
 	for(var i = 0; i < asteroids.length; i++) {
@@ -497,7 +497,7 @@ function render_objects() {
 		if(!current_meteor_status) continue;
 		
 		//Falcon-Meteor Collision
-		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30) && falconEnabled) {
+		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30) && falconEnabled && !falconInvincible) {
 				
 				
 				falcon_vx = 0;
@@ -554,7 +554,7 @@ function render_objects() {
 		if(!current_asteroid_status) continue;
 		
 		//Falcon-Asteroid Collision
-		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size) && falconEnabled) {
+		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size) && falconEnabled && !falconInvincible) {
 				
 				falcon_vx = 0;
 				falcon_vy = 0;
@@ -577,8 +577,7 @@ function render_objects() {
 		}
 		
 	}
-	
-	
+		
 	//Falcon-Wormhole Collision
 	if(inRange(falcon_x, falcon_y, wormhole_x, wormhole_y, wormholeSize/3) && wormholeEnabled && Math.floor(wormholeTransition) == Math.floor(wormholeSize)) {
 			wormholeEnabled = false;
@@ -588,7 +587,6 @@ function render_objects() {
 			clearInterval(wormholeCloseTimer);
 	}
 
-	
 	for(var i = 0; i < explosions.length; i++) {
 		var type = explosions[i].type;
 		ctx.drawImage(explosionsprite[type], explosion_imgw[type] * explosions[i].spriteid, 0, explosion_imgw[type], explosion_imgw[type], explosions[i].x - (explosion_imgw[type]/2) * explosion_size[type], explosions[i].y - (explosion_imgw[type]/2) * explosion_size[type], explosion_imgw[type] * explosion_size[type], explosion_imgw[type] * explosion_size[type]);
@@ -596,8 +594,6 @@ function render_objects() {
 			explosions.splice(explosions.indexOf(explosions[i]), 1);
 		}
 	}
-	
-	
 }
 
 
@@ -662,17 +658,23 @@ function inRange(x, y, px, py, radius) {
 
 function onFalconDeath() {
 	falconEnabled = false;
-	stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
-	saveInfo();
-	
-	setTimeout(function () {
-		globalTransitionInProgress = true;
-		globalTransitionDirection = 1;
-		setTimeout("gameOverOverlay()", 400);
-	}, 1000);
-	
+	if(--stats_lives < 1) {
 		
+		stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
+		saveInfo();
+		
+		setTimeout(function () {
+			globalTransitionInProgress = true;
+			globalTransitionDirection = 1;
+			setTimeout("gameOverOverlay()", 400);
+		}, 1000);
+	
+	} else {
+		falconInvincible = true;
+		setTimeout(function() { falconEnabled = true; falconInvincible = false; }, 2000);
+	}
 }
+
 
 
 function gameOverOverlay() {
@@ -715,9 +717,23 @@ function drawScore() {
 	ctx.font = 'bold 15pt Arial';
     ctx.fillStyle = 'lightgreen';
 	//ctx.strokeStyle = 'lightgreen';
-	ctx.fillText("Asteroids: " + stats_destroyed + "  Deaths: " + stats_deaths, canvas.width - 245, 20);
-//	ctx.fillText("Players Online: " + 0, canvas.width - 245, 40);
+	ctx.fillText(stats_destroyed, canvas.width - 60, 27);
+	//ctx.fillText(stats_lives, canvas.width - 130, 27);
+	//ctx.fillText("Players Online: " + 0, canvas.width - 245, 40);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+}
+
+function drawLives() {
+	var lifeIcon = new Image();
+	
+	lifeIcon.src = "game/images/asteroids/asteroid (0).png";
+	ctx.drawImage(lifeIcon, (canvas.width - 110), 1, 40, 40);
+	
+	
+	lifeIcon.src = "game/images/icons/solar-512.png";
+	for(var i = 0; i < stats_lives; i++)
+		ctx.drawImage(lifeIcon, (canvas.width - 160) - (40 * i), 0, 40, 40);
+	
 }
 
 function saveInfo()
@@ -725,14 +741,12 @@ function saveInfo()
 	$.post("ajax/stats.php", { action: 'save', a_fname: tek_fname, a_email: tek_email, score: stats_destroyed, alive: stats_timeAlive },  function(data) {
 		//lol
 	});
-	
 }
 
 function onAssetLoad(e) {
 	//console.log(e);
 	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/(13 + maxAsteroidsIMG + maxBackgroundsIMG) * 100) + "%");
 	
-  
 	if(assetsLoaded >= 13) {
 		if(!gameLoaded) {
 			gameLoaded = true;
@@ -758,5 +772,4 @@ function onAssetLoad(e) {
 		
 		setTimeout(function() { $("#loader").fadeOut(); }, 2500);
 	}
-	
 }
