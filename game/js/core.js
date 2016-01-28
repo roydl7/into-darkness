@@ -64,7 +64,7 @@ var defaultAlpha = 0.9;
 var assetsLoaded = 0;
 var gameLoaded = false;
 var preLoadBackgrounds = 0, preLoadAsteroids = 0;
-
+var controlsEnabled = false;
 
 var tek_email = "user@user.com", tek_fname = "user";
 
@@ -93,9 +93,21 @@ var globalTransitionDirection = 1;
 var globalTransitionValue = 0;
 var globalTransitionInProgress = false;
 
-window.addEventListener("load", onLoad);
+window.addEventListener("load", initialize);
 
-function onLoad() {
+function initialize() {
+	$.ajax("ajax/connect.php", {
+		type: "post",
+		success: function (response) {
+				preload();
+		},
+		error: function () {
+				$("#loadertext").text("Connection Failed.");
+		}
+	});
+}
+
+function preload() {
 	
 	canvas = document.getElementById("game");
 	ctx = canvas.getContext("2d");
@@ -105,18 +117,31 @@ function onLoad() {
 		if(gameLoaded) {
 			if(!gameStarted) {
 				if(!gameOver) {
-					falcon_x = canvas.width/2;
-					falcon_y = canvas.height/2;
-					falcon_fa = 90;
-					falconEnabled = true;
-					globalTransitionInProgress = true;
-					globalTransitionDirection = 1;
+					$("#loader").fadeIn();
+					$("#loadertext").text("Starting new game...");
 					gameStarted = true;
-					stats_deaths = stats_destroyed = 0;
-					stats_lives = 3;
-					stats_gameStartAt = new Date().getTime();
+					
+					$.post("ajax/stats.php", { action: 'start_gameplay_session' },  function(data) {
+						falcon_x = canvas.width/2;
+						falcon_y = canvas.height/2;
+						falcon_fa = 90;
+						falconEnabled = true;
+						globalTransitionInProgress = true;
+						globalTransitionDirection = 1;
+						controlsEnabled = true;
+						stats_deaths = stats_destroyed = 0;
+						stats_lives = 3;
+						stats_gameStartAt = meteor_lastshower = asteroids_lastbelt = new Date().getTime();
+						asteroids.splice(0, asteroids.length);
+						meteors.splice(0, meteors.length);
+			
+						$("#loader").fadeOut();
+					});
+	
+					
 				} else {
 					gameOver = false;
+					controlsEnabled = false;
 				}
 			}
 			keys[e.keyCode] = true;
@@ -134,8 +159,11 @@ function onLoad() {
 		
 	});
 	
-	canvas.width  = window.innerWidth - ((5/100)*window.innerWidth);
-	canvas.height = window.innerHeight - ((5/100)*window.innerHeight);
+	//canvas.width  = window.innerWidth - ((5/100)*window.innerWidth);
+	//canvas.height = window.innerHeight - ((5/100)*window.innerHeight);
+	
+	canvas.width = 1366;
+	canvas.height = 768;
 	
 	falcon_x = canvas.width/2;
 	falcon_y = canvas.height/2;
@@ -289,7 +317,7 @@ function render() {
 		falcon_tfa = falcon_fa = falcon_fa > 360 ? 0 : falcon_fa;
 	
 	
-	if(keys[38] == true) {
+	if(keys[38] == true && controlsEnabled) {
 		acc = 3;
 		accelerate(); 
 	}
@@ -658,21 +686,34 @@ function inRange(x, y, px, py, radius) {
 
 function onFalconDeath() {
 	falconEnabled = false;
-	if(--stats_lives < 1) {
-		
-		stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
-		saveInfo();
-		
-		setTimeout(function () {
-			globalTransitionInProgress = true;
-			globalTransitionDirection = 1;
-			setTimeout("gameOverOverlay()", 400);
-		}, 1000);
 	
-	} else {
-		falconInvincible = true;
-		setTimeout(function() { falconEnabled = true; falconInvincible = false; }, 2000);
-	}
+	$("#loader").fadeIn();
+	$("#loadertext").text(stats_lives - 1 > 0 ? "Respawning..." : "Processing...");
+	
+	$.post("ajax/stats.php", { action: 'on_death' },  function(data) {
+		stats_lives = parseInt((JSON.parse(data)).d);	
+		
+			if(stats_lives < 1) {
+			
+			stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
+			saveInfo();
+			
+			setTimeout(function () {
+				globalTransitionInProgress = true;
+				globalTransitionDirection = 1;
+				setTimeout("gameOverOverlay()", 400);
+			}, 1000);
+	
+		} else {
+			falconInvincible = true;
+			setTimeout(function() { falconEnabled = true; falconInvincible = false; }, 2000);
+		}
+		
+		$("#loader").fadeOut();
+	});
+	
+	
+	
 }
 
 

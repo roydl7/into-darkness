@@ -1,22 +1,22 @@
 <?php
+session_start();
+
 
 require "mysql.php";
 $action = $_POST['action'];
-$email = $_POST['a_email'];
-$fname = $_POST['a_fname'];
-$score = $_POST['score'];
-$alive = $_POST['alive'];
 
-$query = "SELECT * FROM `into_darkness_data` WHERE `tek_emailid` = '$email'";
+$query = "SELECT * FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
 $result = $conn -> query($query);
 
 
 switch($action) {
 	case "save": 	if($result) {
+						$score = $_SESSION['asteroids_destroyed'];
+						$alive = time() - $_SESSION['gameplay_session_start_time'];
 						if ($result -> num_rows > 0) {
 							$query = "UPDATE `into_darkness_data` SET `score` = $score, `time` = $alive, `lastplayed` = " . time() . ";";
 						} else {
-							$query = "INSERT INTO `into_darkness_data` VALUES ('$email', '$fname', $score, $alive, 0, " . time() . ")";
+							$query = "INSERT INTO `into_darkness_data` VALUES ('" . $_SESSION['tek_emailid'] . "', '" . $_SESSION['tek_fname'] . "', $score, $alive, 0, " . time() . ")";
 						}
 					} else {
 						echo $conn -> error;
@@ -24,6 +24,27 @@ switch($action) {
 					if($conn -> query($query) === TRUE) {
 							echo "SAVE001";				
 					} else echo $conn->error;
+					
+					break;
+	
+	case "asteroid_update": 
+					$_SESSION['asteroids_destroyed'] += $_POST['destroy_count'];
+					break;
+					
+	case "start_gameplay_session": 
+					sleep(2);
+					$_SESSION['player_deaths'] = 3;
+					$_SESSION['gameplay_session_start_time'] = time();
+					break;
+					
+	case "on_death": 
+					sleep(2);
+					$_SESSION['player_deaths']--;
+					echo json_encode(array('d' => $_SESSION['player_deaths']));
+					break;					
+					
+					
+					
 }
 					
 					
