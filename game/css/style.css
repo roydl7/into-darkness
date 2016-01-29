@@ -1,11 +1,11 @@
 body {
 	background: black;
-	overflow: none;
+	overflow: hidden;
 }
 
 #game {
 	margin: auto; 
-	width: 99%;
+	height: 100%;
 	display: block; 
 }
 
