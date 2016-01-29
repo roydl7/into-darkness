@@ -114,7 +114,7 @@ function onLoad() {
 					gameStarted = true;
 					stats_deaths = stats_destroyed = 0;
 					stats_lives = 3;
-					stats_gameStartAt = new Date().getTime();
+					stats_gameStartAt = meteor_lastshower = asteroids_lastbelt = new Date().getTime();
 				} else {
 					gameOver = false;
 				}
@@ -260,11 +260,11 @@ function render() {
 		asteroid_belt();
 	}
 	 
-	if(new Date().getTime() - meteor_lastshower > 10000) {
+	if(new Date().getTime() - meteor_lastshower > 15000) {
 		meteor_shower();
 	}
 	
-	if(new Date().getTime() - wormhole_last > 20000 && gameStarted) {
+	if(new Date().getTime() - wormhole_last > 25000 && gameStarted) {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
@@ -357,7 +357,7 @@ function render() {
 			ctx.textAlign = "center"; 
 			ctx.fillText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
 			ctx.fillText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
-			ctx.fillText("Points Scored: " + Math.ceil((Math.round(stats_timeAlive)/60)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
+			ctx.fillText("Points Scored: " + Math.ceil((Math.round(stats_timeAlive)/120)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
 			ctx.textAlign = "left"; 
 		} 
 			
@@ -500,8 +500,8 @@ function render_objects() {
 		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30) && falconEnabled && !falconInvincible) {
 				
 				
-				falcon_vx = 0;
-				falcon_vy = 0;
+				//falcon_vx = 0;
+				//falcon_vy = 0;
 				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
@@ -556,8 +556,8 @@ function render_objects() {
 		//Falcon-Asteroid Collision
 		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size) && falconEnabled && !falconInvincible) {
 				
-				falcon_vx = 0;
-				falcon_vy = 0;
+				//falcon_vx = 0;
+				//falcon_vy = 0;
 				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
@@ -643,6 +643,8 @@ function checkBounds() {
 		hit = true;
 	}
 	if(hit) {
+		
+		console.log("OUTTABOUNDS! " + Math.random());
 		engineOn = false;
 		setTimeout(function() { engineOn = true; }, 150);
 	}
