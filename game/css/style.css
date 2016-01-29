@@ -46,6 +46,34 @@ body {
 	background-size: contain;
 }
 
+.music-btn
+{
+	display: inline-block;
+	background: white;
+	width: 20px;
+	height: 20px;
+	opacity: 1;
+	border-radius: 20px;
+	border: 2px solid blue;
+	cursor: pointer;
+}
+
+.music-btn:hover
+{
+	background-color: white;
+	border: 2px solid red;
+}
+
+.mmute {
+	background-image: url(../images/icons/music_note_mute.png);
+	background-size: contain;
+}
+
+.unmmute {
+	background-image: url(../images/icons/music_note.png);
+	background-size: contain;
+}
+
 #loader {
 	position: fixed;
 	display: block;

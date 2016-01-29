@@ -59,6 +59,7 @@ var gameOver = false;
 var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
+var music_muted = false;
 var sound_muted = false;
 var defaultAlpha = 0.9; 
 var assetsLoaded = 0;
@@ -143,6 +144,7 @@ function onLoad() {
 	music = document.createElement("audio");
 	music.src = "game/audio/interstellar.mp3";
 	music.oncanplaythrough = onAssetLoad;
+	music.volume = 1;
 	music.loop = true;
 	music.play();
 		
@@ -357,7 +359,7 @@ function render() {
 			ctx.textAlign = "center"; 
 			ctx.fillText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
 			ctx.fillText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
-			ctx.fillText("Points Scored: " + Math.ceil((Math.round(stats_timeAlive)/120)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
+			ctx.fillText("Points Scored: " + Math.ceil((Math.round(stats_timeAlive)/120)* stats_destroyed/2),  canvas.width/2+15, canvas.height/2+100);
 			ctx.textAlign = "left"; 
 		} 
 			
@@ -411,6 +413,7 @@ function shoot() {
 	if(!sound_muted) {
 		sound = document.createElement("audio");
 		sound.src = "game/audio/pew.mp3";
+		sound.volume = 0.1;
 		sound.play();
 	}
 }
@@ -478,6 +481,7 @@ function render_objects() {
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.volume = 0.2;
 					sound.play();
 				}
 	
@@ -506,6 +510,7 @@ function render_objects() {
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion3.mp3";
+					sound.volume = 0.4;
 					sound.play();
 				}
 				
@@ -535,6 +540,7 @@ function render_objects() {
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.volume = 0.2;
 					sound.play();
 				}
 	
@@ -562,6 +568,7 @@ function render_objects() {
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion3.mp3";
+					sound.volume = 0.4;
 					sound.play();
 				}
 				
