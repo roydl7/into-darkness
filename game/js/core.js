@@ -693,11 +693,11 @@ function onFalconDeath() {
 	$.post("ajax/stats.php", { action: 'on_death' },  function(data) {
 		stats_lives = parseInt((JSON.parse(data)).d);	
 		
-			if(stats_lives < 1) {
-			
+		if(stats_lives < 1) {
+		
 			stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
 			saveInfo();
-			
+
 			setTimeout(function () {
 				globalTransitionInProgress = true;
 				globalTransitionDirection = 1;
