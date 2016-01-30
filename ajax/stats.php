@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-
 require "mysql.php";
 $action = $_POST['action'];
 
@@ -40,10 +39,30 @@ switch($action) {
 	case "on_death": 
 					sleep(2);
 					$_SESSION['player_deaths']--;
-					echo json_encode(array('d' => $_SESSION['player_deaths']));
+					
+					if(isset($_POST['destroyed_uids'])) {
+						
+						
+						$_SESSION['asteroids_destroyed'] = count(array_intersect($_SESSION['asteroids_generated'], $_POST['destroyed_uids']));
+					}
+					
+					$gamedata = array(
+						'd' => $_SESSION['player_deaths'], 
+						's' => $_SESSION['asteroids_destroyed'], 
+						'a' => time() - $_SESSION['gameplay_session_start_time'],
+						'f' => ceil(( time() - $_SESSION['gameplay_session_start_time'] ) * $_SESSION['asteroids_destroyed'])
+					);
+					echo json_encode($gamedata);
 					break;					
 					
+	case "generate_asteroids":
 					
+					$asteroids = array();
+					for($i = 0; $i < 10; $i++) {
+						$asteroids[$i] = uniqid(); 
+						$_SESSION['asteroids_generated'][] = $asteroids[$i];
+					}
+					echo json_encode($asteroids);
 					
 }
 					

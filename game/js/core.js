@@ -3,7 +3,7 @@ var canvas;
 var ctx;
 
 //Const
-var maxBackgroundsIMG = 15;
+var maxBackgroundsIMG = 14;
 var maxAsteroidsIMG = 10; 
 
 //Images
@@ -51,14 +51,17 @@ var stats_deaths = 0;
 var stats_gameStartAt = 0;
 var stats_timeAlive = 0;
 var stats_lives = 3;
+var stats_finalScore = 0;
+var destroyed_asteroids = [];
 
 //System
-var debugEnabled = false;
+var debugEnabled = true;
 var gameStarted = false;
 var gameOver = false;
 var keys = [];
 var lastCalledTime, fps, lastFPSUpdate = 0;
 var canvasShake = false;
+var music_muted = false;
 var sound_muted = false;
 var defaultAlpha = 0.9; 
 var assetsLoaded = 0;
@@ -120,12 +123,14 @@ function preload() {
 					$("#loader").fadeIn();
 					$("#loadertext").text("Starting new game...");
 					gameStarted = true;
-					
+
 					$.post("ajax/stats.php", { action: 'start_gameplay_session' },  function(data) {
+						
 						falcon_x = canvas.width/2;
 						falcon_y = canvas.height/2;
 						falcon_fa = 90;
 						falconEnabled = true;
+						falconInvincible = false;
 						globalTransitionInProgress = true;
 						globalTransitionDirection = 1;
 						controlsEnabled = true;
@@ -134,7 +139,7 @@ function preload() {
 						stats_gameStartAt = meteor_lastshower = asteroids_lastbelt = new Date().getTime();
 						asteroids.splice(0, asteroids.length);
 						meteors.splice(0, meteors.length);
-			
+				
 						$("#loader").fadeOut();
 					});
 	
@@ -145,8 +150,8 @@ function preload() {
 				}
 			}
 			keys[e.keyCode] = true;
-			if(e.keyCode == 32) {
-				if(new Date().getTime() - last_shot > 180 ) {	
+			if(e.keyCode == 32 && falconEnabled) {
+				if(new Date().getTime() - last_shot > 180) {	
 					shoot();
 					last_shot = new Date().getTime();
 				}
@@ -171,6 +176,7 @@ function preload() {
 	music = document.createElement("audio");
 	music.src = "game/audio/interstellar.mp3";
 	music.oncanplaythrough = onAssetLoad;
+	music.volume = 1;
 	music.loop = true;
 	music.play();
 		
@@ -230,7 +236,9 @@ function preload() {
 }
 
 
-function asteroid_belt() {
+function asteroid_belt(data) {
+	var asteroid_data = JSON.parse(data);
+	var asteroid_id_cnt = 0;
 	
 	for(var i = 0; i < 5; i++) {
 		var ax = canvas.width + 100;
@@ -238,7 +246,7 @@ function asteroid_belt() {
 		var aa = 110 - Math.floor(Math.random() * 150);
 		var af = new Image();
 		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * maxAsteroidsIMG)) + ").png";
-		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
+		var asteroid = { angle: aa, x: ax, y: ay, uid: asteroid_data[asteroid_id_cnt++], img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
 	
@@ -248,10 +256,9 @@ function asteroid_belt() {
 		var aa = 240 - Math.floor(Math.random() * 150);
 		var af = new Image();
 		af.src = "game/images/asteroids/asteroid (" + (Math.floor(Math.random() * maxAsteroidsIMG)) + ").png";
-		var asteroid = { angle: aa, x: ax, y: ay, img: af, size: 1 + Math.random()};
+		var asteroid = { angle: aa, x: ax, y: ay, uid: asteroid_data[asteroid_id_cnt++], img: af, size: 1 + Math.random()};
 		asteroids.push(asteroid);
 	}
-	asteroids_lastbelt = new Date().getTime();
 }
 
 function meteor_shower() {
@@ -285,14 +292,18 @@ function render() {
 	checkBounds();
 	
 	if(new Date().getTime() - asteroids_lastbelt > 5000) {
-		asteroid_belt();
+		asteroids_lastbelt = new Date().getTime(); //set time right over here, the delay causes this part to exec multiple times
+		$.post("ajax/stats.php", { action: 'generate_asteroids' },  function(data) {
+			asteroid_belt(data);
+		});
+	
 	}
 	 
-	if(new Date().getTime() - meteor_lastshower > 10000) {
+	if(new Date().getTime() - meteor_lastshower > 15000) {
 		meteor_shower();
 	}
 	
-	if(new Date().getTime() - wormhole_last > 20000 && gameStarted) {
+	if(new Date().getTime() - wormhole_last > 25000 && gameStarted) {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
@@ -329,8 +340,6 @@ function render() {
 	
 	if(wormholeEnabled) drawWormhole();
 
-	if(falconInvincible && new Date().getTime()%5 == 0) falconEnabled = !falconEnabled;
-	
 	if(falconEnabled) drawFalcon();
 	
 	render_objects();
@@ -385,7 +394,9 @@ function render() {
 			ctx.textAlign = "center"; 
 			ctx.fillText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
 			ctx.fillText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
-			ctx.fillText("Points Scored: " + Math.ceil((Math.round(stats_timeAlive)/60)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
+			//ctx.fillText("Score: " + Math.ceil((Math.round(stats_timeAlive)/60)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
+			ctx.fillText("Score: " + stats_finalScore,  canvas.width/2, canvas.height/2+100);
+
 			ctx.textAlign = "left"; 
 		} 
 			
@@ -421,13 +432,16 @@ function drawWormhole() {
 }
 
 function drawFalcon() {
-
 	ctx.save();
 	ctx.translate(falcon_x, falcon_y);
 	ctx.rotate((falcon_fa - 90) * Math.PI/180);
-	ctx.drawImage(keys[38] == true && engineOn ? falcon2 : falcon, -falcon_w/2, -falcon_h/2, falcon_w, falcon_h);
-	ctx.restore();
 	
+	if(falconInvincible && new Date().getTime()%2 == 0) ctx.globalAlpha = 0.1;
+	
+	ctx.drawImage(keys[38] == true && engineOn ? falcon2 : falcon, -falcon_w/2, -falcon_h/2, falcon_w, falcon_h);
+	
+	ctx.restore();
+	ctx.globalAlpha = defaultAlpha;
 }
 
 
@@ -439,6 +453,7 @@ function shoot() {
 	if(!sound_muted) {
 		sound = document.createElement("audio");
 		sound.src = "game/audio/pew.mp3";
+		sound.volume = 0.1;
 		sound.play();
 	}
 }
@@ -469,7 +484,7 @@ function render_objects() {
 		ctx.drawImage(asteroids[i].img, asteroids[i].x - current_asteroid_radius, asteroids[i].y - current_asteroid_radius, current_asteroid_radius * 2, current_asteroid_radius * 2);
 		
 		ctx.font = '10pt Courier New';
-		if(debugEnabled) ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1), asteroids[i].x, asteroids[i].y);
+		if(debugEnabled) ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1) + " id: " + asteroids[i].uid, asteroids[i].x, asteroids[i].y);
 		
 		if(isOutOfBounds(asteroids[i].x, asteroids[i].y)) {
 			var index = asteroids.indexOf(asteroids[i]);
@@ -506,6 +521,7 @@ function render_objects() {
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.volume = 0.2;
 					sound.play();
 				}
 	
@@ -517,7 +533,7 @@ function render_objects() {
 				bullets.splice(bullets.indexOf(bullets[j]), 1);
 				current_meteor_status = false;
 				
-				stats_destroyed++;
+				//stats_destroyed++;
 				break;
 			}
 		}
@@ -527,13 +543,11 @@ function render_objects() {
 		//Falcon-Meteor Collision
 		if(inRange(falcon_x, falcon_y, meteors[i].x, meteors[i].y, 30) && falconEnabled && !falconInvincible) {
 				
-				
-				falcon_vx = 0;
-				falcon_vy = 0;
-				
+
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion3.mp3";
+					sound.volume = 0.4;
 					sound.play();
 				}
 				
@@ -559,12 +573,17 @@ function render_objects() {
 		for(var j = 0; j < bullets.length; j++) {
 			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15 * asteroids[i].size)) {
 				
-		
+				
+				
+				destroyed_asteroids.push(asteroids[i].uid);
+				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
+					sound.volume = 0.2;
 					sound.play();
 				}
+	
 	
 				canvasShake = true;
 				setTimeout(function() { canvasShake = false; }, 500);
@@ -584,12 +603,12 @@ function render_objects() {
 		//Falcon-Asteroid Collision
 		if(inRange(falcon_x, falcon_y, asteroids[i].x, asteroids[i].y, 30 * asteroids[i].size) && falconEnabled && !falconInvincible) {
 				
-				falcon_vx = 0;
-				falcon_vy = 0;
+
 				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion3.mp3";
+					sound.volume = 0.4;
 					sound.play();
 				}
 				
@@ -671,6 +690,8 @@ function checkBounds() {
 		hit = true;
 	}
 	if(hit) {
+		
+		console.log("OUTTABOUNDS! " + Math.random());
 		engineOn = false;
 		setTimeout(function() { engineOn = true; }, 150);
 	}
@@ -685,17 +706,23 @@ function inRange(x, y, px, py, radius) {
 }
 
 function onFalconDeath() {
-	falconEnabled = false;
-	
+	falconInvincible = true;
 	$("#loader").fadeIn();
 	$("#loadertext").text(stats_lives - 1 > 0 ? "Respawning..." : "Processing...");
 	
-	$.post("ajax/stats.php", { action: 'on_death' },  function(data) {
-		stats_lives = parseInt((JSON.parse(data)).d);	
+	$.post("ajax/stats.php", { action: 'on_death', 'destroyed_uids[]': destroyed_asteroids },  function(data) {
+		var gamedata = JSON.parse(data); //parseInt((JSON.parse(data)).d);	
+		stats_lives = parseInt(gamedata.d);
 		
 		if(stats_lives < 1) {
-		
-			stats_timeAlive = (new Date().getTime() - stats_gameStartAt)/1000;
+
+			falconInvincible = true;
+			falconEnabled = false;
+			
+			stats_timeAlive = parseInt(gamedata.a);//(new Date().getTime() - stats_gameStartAt)/1000;
+			stats_destroyed = parseInt(gamedata.s);
+			stats_finalScore = parseInt(gamedata.f);
+			
 			saveInfo();
 
 			setTimeout(function () {
@@ -703,6 +730,8 @@ function onFalconDeath() {
 				globalTransitionDirection = 1;
 				setTimeout("gameOverOverlay()", 400);
 			}, 1000);
+			
+			
 	
 		} else {
 			falconInvincible = true;
@@ -751,6 +780,14 @@ function debug() {
 		explosionString += "" + i + " (" + explosions[i].type + "){" + explosions[i].spriteid + "}";
 	}
 	ctx.fillText("explosions: [" + explosionString + "]",10, 140);
+	
+	ctx.font = '5pt Courier New';
+	var tempString30 = "";
+	for(var i = 0; i < destroyed_asteroids.length; i++) {	
+		tempString30 = destroyed_asteroids[i];
+		ctx.fillText("." + tempString30, 10, 160 + (i * 7));
+	}
+	
 	
 }
 
