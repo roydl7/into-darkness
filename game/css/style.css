@@ -100,3 +100,55 @@ body {
 	font-family: Arial;
 	font-weight: bold;
 }
+
+#toggle-leaderboard {
+	position: fixed;
+	display: block;
+	width: 400px;
+	height: 50%;
+	right: -390;
+	top: 10%;
+	box-shadow: 0px 0px 20px black;
+	opacity: 0.8;
+	background: black;
+	border-radius: 5px;
+}
+
+#tablearea table {
+	margin: auto;
+	color: white;
+	padding: 5px;
+	
+	font-family: 'Arial';
+	font-weight: bold;
+}
+
+#tablearea th, td{
+	padding: 10px;
+	text-align: center;
+}
+
+#tablearea {
+	width: 100%;
+	position: absolute;
+	top: 5;
+	left: 10;
+}
+
+.lb {
+	color:white;
+	font-weight:bold;
+	display: inline-block;
+}
+
+.lb span {
+	transform: rotate(-90deg);
+	position: relative;
+	left: -50%;
+	top: 50;
+	color:white;
+	font-weight:bold;
+	display: inline-block;
+	background: black;
+	border-radius: 4px;
+}

@@ -14,7 +14,7 @@
 		<br/><br/>
 		<span class = "option"><a href="game.php"><img src="images/play.png"/></a></span></br> 	
 		<span class = "option"><a href=""><img src="images/story.png"></a></span></br>
-		<span class = "option"><a href=""><img src="images/instructions.png"></a></span></br></br>
+		<span class = "option"><a href=""><img src="images/instructions.png"></a></span></br>
 		<span class = "option"><a href=""><img src="images/highscores.png"></a></span>
 		</div>
 	</div>

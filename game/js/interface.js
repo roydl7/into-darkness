@@ -1,3 +1,6 @@
+var leaderboardStatus = false;
+var leaderboardData;
+
 $(document).ready(function() {
 	
 	$("#mutebtn").click(function(){
@@ -12,10 +15,6 @@ $(document).ready(function() {
 		}
 	});
 	
-});
-
-$(document).ready(function() {
-	
 	$("#musicmute").click(function(){
 		
 		if(!music.muted) {
@@ -28,4 +27,36 @@ $(document).ready(function() {
 		}
 	});
 	
+	
+	
 });
+
+
+
+function showLeaderboard() {
+	if(!leaderboardStatus) {
+		$("#toggle-leaderboard").animate({'right': 0});
+		leaderboardStatus = true;
+	}
+}
+
+function hideLeaderboard() {
+	if(leaderboardStatus) {
+		$("#toggle-leaderboard").animate({'right': -390});
+		leaderboardStatus = false;
+	}
+}
+
+function updateLeaderboard(data) {
+	
+	$("#tablearea").html("");
+	$("#tablearea").append("<table/>");
+	$("#tablearea table").append("<tr><td>Rank</td><td>Name</td><td>Score</td></tr>");
+	for(var i = 0; i < data.leaderboard_data.length; i++) {
+		$("#tablearea table").append("<tr><td>" + (i + 1) + "</td><td>" + data.leaderboard_data[i].n + "</td><td>" + data.leaderboard_data[i].s + "</td></tr>");
+	}
+	
+}
+
+
+

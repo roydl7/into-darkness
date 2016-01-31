@@ -1,27 +1,32 @@
 <?php
 session_start();
+sleep(1);
 
 require "mysql.php";
 $action = $_POST['action'];
 
-$query = "SELECT * FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
-$result = $conn -> query($query);
-
+$lookupQuery = "SELECT * FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
+$lookupResult = $conn -> query($lookupQuery);
+if ($lookupResult -> num_rows < 1) {
+	$query = "INSERT INTO `into_darkness_data` VALUES ('" . $_SESSION['tek_emailid'] . "', '" . $_SESSION['tek_fname'] . "', 0, 0, 0, " . time() . ")";
+	if($conn -> query($query) === TRUE) {
+		echo "USER_CREATE";				
+	} else echo $conn->error;
+} else {
+	$query = "UPDATE `into_darkness_data` SET `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
+	$conn -> query($query);
+}
+						
 
 switch($action) {
-	case "save": 	if($result) {
-						$score = $_SESSION['asteroids_destroyed'];
+	case "save": 	if ($lookupResult -> num_rows > 0) {
+						$score = $_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2;
 						$alive = time() - $_SESSION['gameplay_session_start_time'];
-						if ($result -> num_rows > 0) {
-							$query = "UPDATE `into_darkness_data` SET `score` = $score, `time` = $alive, `lastplayed` = " . time() . ";";
-						} else {
-							$query = "INSERT INTO `into_darkness_data` VALUES ('" . $_SESSION['tek_emailid'] . "', '" . $_SESSION['tek_fname'] . "', $score, $alive, 0, " . time() . ")";
-						}
-					} else {
-						echo $conn -> error;
+						$query = "UPDATE `into_darkness_data` SET `score` = $score, `alive` = $alive, `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
 					}
+					
 					if($conn -> query($query) === TRUE) {
-							echo "SAVE001";				
+							echo "USER_UPDATE";				
 					} else echo $conn->error;
 					
 					break;
@@ -31,13 +36,11 @@ switch($action) {
 					break;
 					
 	case "start_gameplay_session": 
-					sleep(2);
 					$_SESSION['player_deaths'] = 3;
 					$_SESSION['gameplay_session_start_time'] = time();
 					break;
 					
 	case "on_death": 
-					sleep(2);
 					$_SESSION['player_deaths']--;
 					
 					$_SESSION['meteors_destroyed'] = $_SESSION['asteroids_destroyed'] = 0;
@@ -76,44 +79,51 @@ switch($action) {
 					
 					echo json_encode(array("meteor" => $meteor));
 					break;	
+					
+	case "get_stats":
+					$onlineUsers = 0;
+					$query = "SELECT COUNT(*) FROM `into_darkness_data` WHERE `lastping` > " . (time() - 30);
+					$result = $conn -> query($query);
+					if ($result -> num_rows > 0) {
+						$result = $result -> fetch_array(MYSQLI_NUM);
+						$onlineUsers = $result[0];
+					}
+					
+					$userRank = 1;
+					$query = "SELECT FIND_IN_SET(score, (SELECT GROUP_CONCAT(`score` ORDER BY `score` DESC) FROM `into_darkness_data`)) FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
+					$result = $conn -> query($query);
+					 echo $conn->error;
+					if ($result -> num_rows > 0) {
+						$result = $result -> fetch_array(MYSQLI_NUM);
+						$userRank = $result[0];
+					}
+					
+					$query = "SELECT `tek_fname`, `score` FROM `into_darkness_data` ORDER BY `score` DESC";
+					$result = $conn -> query($query);
+					$data = array();
+					while($row = $result -> fetch_assoc()) {
+						$data[] = array('n' => $row['tek_fname'], 's' => $row['score']);
+					}
+					
+					$jsonString = array(
+						"online_users" => $onlineUsers,
+						"user_rank" => $userRank,
+						"leaderboard_data" => $data
+					);
+					
+					echo json_encode($jsonString);
+					
+					break;					
 }
 					
-					
+	
 
 $conn->close();
 die;
 
-/*
-switch($action) {
-	case "update": 	$query = "INSERT INTO `scores` VALUES ("
-					if($conn -> query($query) === TRUE) {
-						echo "200";
-					}
-					break;
-	case "fetch":	$query = "SELECT `userid`, `score` FROM `scores`";
-					if($conn -> query($query) === TRUE) {
-						if ($result -> num_rows > 0) {
-							$data = array();
-							while($row = $result -> fetch_assoc()) {
-								$data[] = $row;
-							}
-							echo json_encode($data);
-						}
-					}
-	case "sfetch":	$query = "SELECT * FROM `scores` WHERE `userid` = " . $userid;
-					if($conn -> query($query) === TRUE) {
-						if($result -> num_rows) {
-							data = array();
-							$row = $result -> fetch_array();
-							echo json_encode($data);
-						}
-					}
-	
-}
 
 
 
-$conn->close();
-*/
+
 
 ?>

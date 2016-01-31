@@ -1,4 +1,4 @@
-var ver = "0.1a r1228"
+var ver = "0.2a"
 var canvas;
 var ctx;
 
@@ -55,6 +55,8 @@ var stats_finalScore = 0;
 
 var destroyed_asteroids = [];
 var destroyed_meteors = [];
+
+var footerData;
 
 //System
 var debugEnabled = true;
@@ -233,6 +235,13 @@ function preload() {
 	end.src = "game/images/end.png";
 	
 	
+	setInterval(function() { 
+		$.post("ajax/stats.php", { action: 'get_stats' },  function(data) {
+			footerData = JSON.parse(data);
+			updateLeaderboard(footerData);
+		});
+	}, 5000);
+	
 	render();
 	   
 }
@@ -280,7 +289,7 @@ function meteor_shower(data) {
 		aa = 90;
 		ty = 1;
 	}
-	var meteor = { angle: aa, x: ax, y: ay, id: meteor_data.meteor, frameid: 0, type: ty};
+	var meteor = { angle: aa, x: ax, y: ay, uid: meteor_data.meteor, frameid: 0, type: ty};
 	meteors.push(meteor);
 		
 	
@@ -378,9 +387,12 @@ function render() {
 		if(globalTransitionValue > 0.99) globalTransitionDirection = 0;
 	}
 	
-	
-	drawScore();
-	drawLives();
+	if(gameStarted) {
+		drawScore();
+		drawLives();
+		drawFooter();
+		
+	}
 	
 	if(!gameStarted) 
 	{
@@ -398,12 +410,18 @@ function render() {
 
 			ctx.drawImage(end, 0, 0, canvas.width, canvas.height);
 			ctx.font = 'bold 35pt Arial';
-			ctx.fillStyle = 'red';
+			ctx.fillStyle = '#87E1FF';
 			ctx.textAlign = "center"; 
+			ctx.strokeStyle = 'black';
 			ctx.fillText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
+			//ctx.strokeText("Asteroids destroyed: " + stats_destroyed, canvas.width/2, canvas.height/2 + 50);
+			
 			ctx.fillText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
+			//ctx.strokeText("Time Alive: " + stats_timeAlive + " seconds", canvas.width/2, canvas.height/2);
+			
 			//ctx.fillText("Score: " + Math.ceil((Math.round(stats_timeAlive)/60)* stats_destroyed/2),  canvas.width/2+60, canvas.height/2+100);
 			ctx.fillText("Score: " + stats_finalScore,  canvas.width/2, canvas.height/2+100);
+			//ctx.strokeText("Score: " + stats_finalScore,  canvas.width/2, canvas.height/2+100);
 
 			ctx.textAlign = "left"; 
 		} 
@@ -421,6 +439,11 @@ function render() {
 	}
 	lastCalledTime = Date.now();
 	
+	
+	if(keys[76]) {
+		//Interface.js
+		showLeaderboard();
+	} else hideLeaderboard();
 }
 
 function drawBackground() {
@@ -769,6 +792,7 @@ function gameOverOverlay() {
 }
 
 function debug() {
+	ctx.textAlign = 'left';
 	ctx.font = '15pt Courier New';
     ctx.fillStyle = 'lightgreen';
 	ctx.fillText("IntoDarkness ver. " + ver, 10, 20);
@@ -829,6 +853,23 @@ function drawLives() {
 		ctx.drawImage(lifeIcon, (canvas.width - 160) - (40 * i), 0, 40, 40);
 	
 }
+
+function drawFooter() {
+	if(typeof footerData == 'undefined') return;
+	ctx.font = 'bold 12pt Arial';
+    ctx.fillStyle = 'white';
+	ctx.textAlign = 'left';
+	ctx.fillText("Players Online: " + footerData.online_users, 10, canvas.height - 20);
+	ctx.textAlign = 'center';
+	ctx.fillText("Global Rank: #" + footerData.user_rank, canvas.width/2, canvas.height - 20);
+	ctx.textAlign = 'right';
+	ctx.fillText("Hold L to toggle leaderboard", canvas.width - 20, canvas.height - 20);
+	//ctx.fillText(stats_lives, canvas.width - 130, 27);
+	//ctx.fillText("Players Online: " + 0, canvas.width - 245, 40);
+	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
+	
+}
+
 
 function saveInfo()
 {

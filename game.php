@@ -19,5 +19,6 @@ $_SESSION['tek_fname'] = "player";
 	<div id="musicmute" class="music-btn unmmute"></div>
 </div>
 <div id="loader"><img src="images/loader.svg"/><span id="loadertext">Connecting...</span></div>
+<div id="toggle-leaderboard"><span class='lb'><span>LEADERBOARD</span></span><span id='tablearea'>Connecting...</span></div>
 </body>
 </html>
