@@ -52,7 +52,9 @@ var stats_gameStartAt = 0;
 var stats_timeAlive = 0;
 var stats_lives = 3;
 var stats_finalScore = 0;
+
 var destroyed_asteroids = [];
+var destroyed_meteors = [];
 
 //System
 var debugEnabled = true;
@@ -150,7 +152,7 @@ function preload() {
 				}
 			}
 			keys[e.keyCode] = true;
-			if(e.keyCode == 32 && falconEnabled) {
+			if(e.keyCode == 32 && falconEnabled && !falconInvincible) {
 				if(new Date().getTime() - last_shot > 180) {	
 					shoot();
 					last_shot = new Date().getTime();
@@ -261,7 +263,10 @@ function asteroid_belt(data) {
 	}
 }
 
-function meteor_shower() {
+function meteor_shower(data) {
+	
+	var meteor_data = JSON.parse(data);
+
 	var ax = falcon_x;
 	var ay = +10;
 	var aa = -90;
@@ -275,10 +280,10 @@ function meteor_shower() {
 		aa = 90;
 		ty = 1;
 	}
-	var meteor = { angle: aa, x: ax, y: ay, frameid: 0, type: ty};
+	var meteor = { angle: aa, x: ax, y: ay, id: meteor_data.meteor, frameid: 0, type: ty};
 	meteors.push(meteor);
 		
-	meteor_lastshower = new Date().getTime();
+	
 }
 
 
@@ -300,7 +305,10 @@ function render() {
 	}
 	 
 	if(new Date().getTime() - meteor_lastshower > 15000) {
-		meteor_shower();
+		meteor_lastshower = new Date().getTime();
+		$.post("ajax/stats.php", { action: 'generate_meteor' },  function(data) {
+			meteor_shower(data);
+		});
 	}
 	
 	if(new Date().getTime() - wormhole_last > 25000 && gameStarted) {
@@ -483,8 +491,10 @@ function render_objects() {
 		var current_asteroid_radius = asteroid_radius * asteroids[i].size;
 		ctx.drawImage(asteroids[i].img, asteroids[i].x - current_asteroid_radius, asteroids[i].y - current_asteroid_radius, current_asteroid_radius * 2, current_asteroid_radius * 2);
 		
-		ctx.font = '10pt Courier New';
-		if(debugEnabled) ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1) + " id: " + asteroids[i].uid, asteroids[i].x, asteroids[i].y);
+		if(debugEnabled) {
+			ctx.font = '10pt Courier New';
+			ctx.fillText("x: " + Math.round(asteroids[i].x, 1) + " y: " + Math.round(asteroids[i].y, 1) + " a: " + Math.round(asteroids[i].angle, 1) + " id: " + asteroids[i].uid, asteroids[i].x, asteroids[i].y);
+		}
 		
 		if(isOutOfBounds(asteroids[i].x, asteroids[i].y)) {
 			var index = asteroids.indexOf(asteroids[i]);
@@ -495,6 +505,11 @@ function render_objects() {
 	for(var i = 0; i < meteors.length; i++) {
 		meteors[i].x = meteors[i].x - 5* Math.cos(meteors[i].angle * Math.PI/180);
 		meteors[i].y = meteors[i].y - 5* Math.sin(meteors[i].angle * Math.PI/180);
+		
+		if(debugEnabled) {
+			ctx.font = '10pt Courier New';
+			ctx.fillText("x: " + Math.round(meteors[i].x, 1) + " y: " + Math.round(meteors[i].y, 1) + " id: " + meteors[i].uid, meteors[i].x, meteors[i].y);
+		}
 		
 		var sx = -20;
 		var sy = 512 * meteors[i].frameid++;
@@ -515,9 +530,10 @@ function render_objects() {
 		//Bullet-Meteor Collision
 		for(var j = 0; j < bullets.length; j++) {
 			current_meteor_status = true;
-			if(inRange(meteors[i].x, meteors[i].y, bullets[j].x, bullets[j].y, 15)) {
+			if(inRange(meteors[i].x, meteors[i].y, bullets[j].x, bullets[j].y, 15) && !falconInvincible) {
 				
-		
+				destroyed_meteors.push(meteors[i].uid);
+				
 				if(!sound_muted) {
 					sound = document.createElement("audio");
 					sound.src = "game/audio/explosion" + ((i+j)%2==0?1:2) + ".mp3";
@@ -571,7 +587,7 @@ function render_objects() {
 		
 		//Bullet-Asteroid Collision
 		for(var j = 0; j < bullets.length; j++) {
-			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15 * asteroids[i].size)) {
+			if(inRange(asteroids[i].x, asteroids[i].y, bullets[j].x, bullets[j].y, 15 * asteroids[i].size) && !falconInvincible) {
 				
 				
 				
@@ -710,7 +726,7 @@ function onFalconDeath() {
 	$("#loader").fadeIn();
 	$("#loadertext").text(stats_lives - 1 > 0 ? "Respawning..." : "Processing...");
 	
-	$.post("ajax/stats.php", { action: 'on_death', 'destroyed_uids[]': destroyed_asteroids },  function(data) {
+	$.post("ajax/stats.php", { action: 'on_death', 'destroyed_uids[]': destroyed_asteroids, 'destroyed_muids[]': destroyed_meteors },  function(data) {
 		var gamedata = JSON.parse(data); //parseInt((JSON.parse(data)).d);	
 		stats_lives = parseInt(gamedata.d);
 		
@@ -765,7 +781,7 @@ function debug() {
 		if(i > 0) meteorString += ", ";
 		meteorString += "" + i;
 	}
-	ctx.fillText("meteors: [" + meteorString + "]",10, 100);
+	ctx.fillText("asteroids: [" + meteorString + "]",10, 100);
 	
 	var bulletString = "";
 	for(var i = 0; i < bullets.length; i++) {

@@ -40,15 +40,19 @@ switch($action) {
 					sleep(2);
 					$_SESSION['player_deaths']--;
 					
+					$_SESSION['meteors_destroyed'] = $_SESSION['asteroids_destroyed'] = 0;
+					
 					if(isset($_POST['destroyed_uids'])) {
-						
-						
 						$_SESSION['asteroids_destroyed'] = count(array_intersect($_SESSION['asteroids_generated'], $_POST['destroyed_uids']));
+					}
+					
+					if(isset($_POST['destroyed_muids'])) {
+						$_SESSION['meteors_destroyed'] = count(array_intersect($_SESSION['meteors_generated'], $_POST['destroyed_muids']));
 					}
 					
 					$gamedata = array(
 						'd' => $_SESSION['player_deaths'], 
-						's' => $_SESSION['asteroids_destroyed'], 
+						's' => $_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2,
 						'a' => time() - $_SESSION['gameplay_session_start_time'],
 						'f' => ceil(( time() - $_SESSION['gameplay_session_start_time'] ) * $_SESSION['asteroids_destroyed'])
 					);
@@ -63,7 +67,15 @@ switch($action) {
 						$_SESSION['asteroids_generated'][] = $asteroids[$i];
 					}
 					echo json_encode($asteroids);
+					break;	
 					
+	case "generate_meteor":
+					
+					$meteor = uniqid(); 
+					$_SESSION['meteors_generated'][] = $meteor;
+					
+					echo json_encode(array("meteor" => $meteor));
+					break;	
 }
 					
 					
