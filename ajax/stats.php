@@ -29,6 +29,10 @@ switch($action) {
 							echo "USER_UPDATE";				
 					} else echo $conn->error;
 					
+					$_SESSION['asteroids_generated'] = array(); 
+					$_SESSION['meteors_generated'] = array(); 
+					
+					
 					break;
 	
 	case "asteroid_update": 
@@ -59,6 +63,7 @@ switch($action) {
 						'a' => time() - $_SESSION['gameplay_session_start_time'],
 						'f' => ceil(( time() - $_SESSION['gameplay_session_start_time'] ) * $_SESSION['asteroids_destroyed'])
 					);
+					
 					echo json_encode($gamedata);
 					break;					
 					
@@ -98,7 +103,7 @@ switch($action) {
 						$userRank = $result[0];
 					}
 					
-					$query = "SELECT `tek_fname`, `score` FROM `into_darkness_data` ORDER BY `score` DESC";
+					$query = "SELECT `tek_fname`, `score` FROM `into_darkness_data` ORDER BY `score` DESC LIMIT 10";
 					$result = $conn -> query($query);
 					$data = array();
 					while($row = $result -> fetch_assoc()) {
@@ -118,7 +123,7 @@ switch($action) {
 					
 	
 
-$conn->close();
+$conn -> close();
 die;
 
 
