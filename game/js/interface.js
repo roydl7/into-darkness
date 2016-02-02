@@ -28,6 +28,26 @@ $(document).ready(function() {
 	});
 	
 	
+	$("#t-right").on('mousedown touchstart', function(){
+		
+		falcon_fa += 5;
+	});
+	
+	$("#t-left").click(function(){
+		
+		falcon_fa -= 5;
+	});
+	
+	$("#t-fire").click(function(){
+		if(!gameStarted) gameScreenProceed();
+		shoot();
+	});
+	
+	$("#t-acc").click(function(){
+		acc();
+	
+	});
+	
 	
 });
 

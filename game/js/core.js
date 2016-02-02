@@ -118,16 +118,10 @@ function initialize() {
 	});
 }
 
-function preload() {
-	
-	canvas = document.getElementById("game");
-	ctx = canvas.getContext("2d");
-	
-	document.addEventListener("keydown", function(e) {
-		
-		if(gameLoaded) {
-			if(!gameStarted && e.keyCode == 13) {
-				if(!gameOver) {
+
+function gameScreenProceed() 
+{
+	if(!gameOver) {
 					$("#loader").fadeIn();
 					$("#loadertext").text("Starting new game...");
 					gameStarted = true;
@@ -156,6 +150,18 @@ function preload() {
 					gameOver = false;
 					controlsEnabled = false;
 				}
+	
+}
+function preload() {
+	
+	canvas = document.getElementById("game");
+	ctx = canvas.getContext("2d");
+	
+	document.addEventListener("keydown", function(e) {
+		
+		if(gameLoaded) {
+			if(!gameStarted && e.keyCode == 13) {
+				gameScreenProceed();
 			}
 			keys[e.keyCode] = true;
 			if(e.keyCode == 32 && falconEnabled && !falconInvincible) {
@@ -245,6 +251,7 @@ function preload() {
 	
 	setInterval(function() { 
 		$.post("ajax/stats.php", { action: 'get_stats' },  function(data) {
+			$("#toggle-leaderboard").css('display', 'block');
 			footerData = JSON.parse(data);
 			updateLeaderboard(footerData);
 		});
@@ -514,8 +521,8 @@ function render_objects() {
 	
 	
 	for(var i = 0; i < asteroids.length; i++) {
-		asteroids[i].x = asteroids[i].x - 3* Math.cos(asteroids[i].angle * Math.PI/180);
-		asteroids[i].y = asteroids[i].y - 3* Math.sin(asteroids[i].angle * Math.PI/180);
+		asteroids[i].x = asteroids[i].x - 4* Math.cos(asteroids[i].angle * Math.PI/180);
+		asteroids[i].y = asteroids[i].y - 4* Math.sin(asteroids[i].angle * Math.PI/180);
 		var current_asteroid_radius = asteroid_radius * asteroids[i].size;
 		ctx.drawImage(asteroids[i].img, asteroids[i].x - current_asteroid_radius, asteroids[i].y - current_asteroid_radius, current_asteroid_radius * 2, current_asteroid_radius * 2);
 		
@@ -844,6 +851,15 @@ function drawScore() {
     ctx.fillStyle = 'lightgreen';
 	//ctx.strokeStyle = 'lightgreen';
 	ctx.fillText(stats_destroyed, canvas.width - 60, 27);
+	ctx.textAlign = 'right';
+	
+	var totalSec = (new Date().getTime() - stats_gameStartAt);
+	var min = parseInt( totalSec/1000 / 60 ) % 60;
+	var sec = parseInt(totalSec/1000 % 60);
+	var ms = parseInt(totalSec % 1000);
+
+	ctx.fillText(("0" + min).slice(-2) + ":" + ("0" + sec).slice(-2) + "." + ("00" + ms).slice(-3), canvas.width - 250, 27);
+	
 	//ctx.fillText(stats_lives, canvas.width - 130, 27);
 	//ctx.fillText("Players Online: " + 0, canvas.width - 245, 40);
 	//ctx.strokeText("Asteroids: " + stats_destroyed + " Deaths: " + stats_deaths, canvas.width - 220, 20);
@@ -888,7 +904,7 @@ function saveInfo()
 
 function onAssetLoad(e) {
 	//console.log(e);
-	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/(13 + maxAsteroidsIMG + maxBackgroundsIMG) * 100) + "%");
+	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/(14 + maxAsteroidsIMG + maxBackgroundsIMG) * 100) + "%");
 	
 	if(assetsLoaded >= 14) {
 		if(!gameLoaded) {

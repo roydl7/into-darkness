@@ -1,7 +1,5 @@
 <?php
 session_start();
-sleep(1);
-
 require "mysql.php";
 $action = $_POST['action'];
 
@@ -10,8 +8,8 @@ $lookupResult = $conn -> query($lookupQuery);
 if ($lookupResult -> num_rows < 1) {
 	$query = "INSERT INTO `into_darkness_data` VALUES ('" . $_SESSION['tek_emailid'] . "', '" . $_SESSION['tek_fname'] . "', 0, 0, 0, " . time() . ")";
 	if($conn -> query($query) === TRUE) {
-		echo "USER_CREATE";				
-	} else echo $conn->error;
+		echo "";				
+	} else echo $conn->error; 
 } else {
 	$query = "UPDATE `into_darkness_data` SET `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
 	$conn -> query($query);
@@ -20,7 +18,7 @@ if ($lookupResult -> num_rows < 1) {
 
 switch($action) {
 	case "save": 	if ($lookupResult -> num_rows > 0) {
-						$score = $_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2;
+						$score = $_SESSION['current_score'];
 						$alive = time() - $_SESSION['gameplay_session_start_time'];
 						$query = "UPDATE `into_darkness_data` SET `score` = $score, `alive` = $alive, `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
 					}
@@ -47,7 +45,7 @@ switch($action) {
 	case "on_death": 
 					$_SESSION['player_deaths']--;
 					
-					$_SESSION['meteors_destroyed'] = $_SESSION['asteroids_destroyed'] = 0;
+					$_SESSION['asteroids_destroyed'] = $_SESSION['meteors_destroyed'] = 0;
 					
 					if(isset($_POST['destroyed_uids'])) {
 						$_SESSION['asteroids_destroyed'] = count(array_intersect($_SESSION['asteroids_generated'], $_POST['destroyed_uids']));
@@ -57,11 +55,12 @@ switch($action) {
 						$_SESSION['meteors_destroyed'] = count(array_intersect($_SESSION['meteors_generated'], $_POST['destroyed_muids']));
 					}
 					
+					$_SESSION['current_score'] = ceil(( time() - $_SESSION['gameplay_session_start_time'] ) * ($_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2));
 					$gamedata = array(
 						'd' => $_SESSION['player_deaths'], 
 						's' => $_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2,
 						'a' => time() - $_SESSION['gameplay_session_start_time'],
-						'f' => ceil(( time() - $_SESSION['gameplay_session_start_time'] ) * $_SESSION['asteroids_destroyed'])
+						'f' => $_SESSION['current_score']
 					);
 					
 					echo json_encode($gamedata);

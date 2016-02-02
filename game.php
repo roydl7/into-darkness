@@ -18,6 +18,27 @@ $_SESSION['tek_fname'] = "player_" . uniqid();
 	<div id="mutebtn" class="cv-footer-btn unmute"></div>
 	<div id="musicmute" class="music-btn unmmute"></div>
 </div>
+
+<?php 
+if($_GET['m']) {
+?>
+
+<div id="mobi-footer">
+	<button id="t-left" class="ctr-btn left">LEFT</button>
+	<button id="t-right" class="ctr-btn left">RIGHT</button>
+	
+	<button id="t-fire" class="ctr-btn right">FIRE</button>
+	<button id="t-acc" class="ctr-btn right">ACC</button>
+
+	
+</div>
+
+<?php
+}
+?>
+
+
+
 <div id="loader"><img src="images/loader.svg"/><span id="loadertext">Connecting...</span></div>
 <div id="toggle-leaderboard"><span class='lb'><span>LEADERBOARD</span></span><span id='tablearea'>Connecting...</span></div>
 </body>
