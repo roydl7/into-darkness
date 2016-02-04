@@ -60,7 +60,7 @@ var destroyed_meteors = [];
 var footerData;
 
 //System
-var debugEnabled = true;
+var debugEnabled = false;
 var gameStarted = false;
 var gameOver = false;
 var keys = [];
@@ -133,6 +133,7 @@ function gameScreenProceed()
 						falcon_x = canvas.width/2;
 						falcon_y = canvas.height/2;
 						falcon_fa = 90;
+						asteroidStep = 1.0;
 						falconEnabled = true;
 						falconInvincible = false;
 						globalTransitionInProgress = true;

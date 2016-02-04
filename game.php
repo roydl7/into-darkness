@@ -21,6 +21,9 @@ $_SESSION['tek_fname'] = "player_" . uniqid();
 </div>
 
 <?php 
+if($_GET['d']) {
+		echo "<script>debugEnabled = true;</script>";
+}
 if($_GET['m']) {
 ?>
 	<div id="mobi-footer">
