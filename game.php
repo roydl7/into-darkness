@@ -5,6 +5,7 @@ $_SESSION['tek_fname'] = "player_" . uniqid();
 ?>
 <html>
 <head>
+<meta content='user-scalable=0'/>
 <link rel="stylesheet" href="game/css/style.css"></link>
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="game/js/core.js"></script>
@@ -22,17 +23,12 @@ $_SESSION['tek_fname'] = "player_" . uniqid();
 <?php 
 if($_GET['m']) {
 ?>
-
-<div id="mobi-footer">
-	<button id="t-left" class="ctr-btn left">LEFT</button>
-	<button id="t-right" class="ctr-btn left">RIGHT</button>
-	
-	<button id="t-fire" class="ctr-btn right">FIRE</button>
-	<button id="t-acc" class="ctr-btn right">ACC</button>
-
-	
-</div>
-
+	<div id="mobi-footer">
+		<button id="t-left" class="ctr-btn left">LEFT</button>
+		<button id="t-right" class="ctr-btn left">RIGHT</button>
+		<button id="t-fire" class="ctr-btn right">FIRE</button>
+		<button id="t-acc" class="ctr-btn right">ACC</button>
+	</div>
 <?php
 }
 ?>

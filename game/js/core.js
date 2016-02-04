@@ -44,6 +44,7 @@ var sound;
 var music;
 
 var acc = 0;
+var touch_acc = false;
 
 //Stats
 var stats_destroyed = 0;
@@ -72,6 +73,7 @@ var assetsLoaded = 0;
 var gameLoaded = false;
 var preLoadBackgrounds = 0, preLoadAsteroids = 0;
 var controlsEnabled = false;
+var asteroidStep = 1.0;
 
 var tek_email = "user@user.com", tek_fname = "user";
 
@@ -226,12 +228,12 @@ function preload() {
 	meteorsprite[1].src = "game/images/asteroids/meteorspriteup.png";
 	meteor_lastshower = new Date().getTime();
 	
-	wormhole[0] = new Image();
-	wormhole[0].onload = onAssetLoad;
-	wormhole[0].src = "game/images/wormhole1.png";
-	wormhole[1] = new Image();
-	wormhole[1].onload = onAssetLoad;
-	wormhole[1].src = "game/images/wormhole2.png";
+	for(var w = 0; w < 5; w++) {
+		wormhole[w] = new Image();
+		wormhole[w].onload = onAssetLoad;
+		wormhole[w].src = "game/images/wormhole" + (w + 1) + ".png";
+	}
+	
 	wormhole_last = new Date().getTime(); //needed for initial delay of wormhole
 	
 	
@@ -320,6 +322,7 @@ function render() {
 	checkBounds();
 	
 	if(new Date().getTime() - asteroids_lastbelt > 5000) {
+		if(asteroidStep < 4.5) asteroidStep += 0.15;
 		asteroids_lastbelt = new Date().getTime(); //set time right over here, the delay causes this part to exec multiple times
 		$.post("ajax/stats.php", { action: 'generate_asteroids' },  function(data) {
 			asteroid_belt(data);
@@ -342,7 +345,7 @@ function render() {
 		wormhole_y = 100 + (Math.random() * (canvas.height - 200));
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
-		wormholeImg = Math.floor(Math.random() * 2);
+		wormholeImg = Math.floor(Math.random() * 5);
 		wormholeCloseTimer = setTimeout("closeWormhole()", 7000);
 	}
 	
@@ -359,7 +362,7 @@ function render() {
 		falcon_tfa = falcon_fa = falcon_fa > 360 ? 0 : falcon_fa;
 	
 	
-	if(keys[38] == true && controlsEnabled) {
+	if(touch_acc || (keys[38] == true && controlsEnabled)) {
 		acc = 3;
 		accelerate(); 
 	}
@@ -520,9 +523,10 @@ function render_objects() {
 	}
 	
 	
+	
 	for(var i = 0; i < asteroids.length; i++) {
-		asteroids[i].x = asteroids[i].x - 4* Math.cos(asteroids[i].angle * Math.PI/180);
-		asteroids[i].y = asteroids[i].y - 4* Math.sin(asteroids[i].angle * Math.PI/180);
+		asteroids[i].x = asteroids[i].x - asteroidStep * Math.cos(asteroids[i].angle * Math.PI/180);
+		asteroids[i].y = asteroids[i].y - asteroidStep * Math.sin(asteroids[i].angle * Math.PI/180);
 		var current_asteroid_radius = asteroid_radius * asteroids[i].size;
 		ctx.drawImage(asteroids[i].img, asteroids[i].x - current_asteroid_radius, asteroids[i].y - current_asteroid_radius, current_asteroid_radius * 2, current_asteroid_radius * 2);
 		
@@ -767,6 +771,13 @@ function onFalconDeath() {
 		var gamedata = JSON.parse(data); //parseInt((JSON.parse(data)).d);	
 		stats_lives = parseInt(gamedata.d);
 		
+		for(var i = 0; i < asteroids.length; i++) {
+			explosions.push({ x:asteroids[i].x, y:asteroids[i].y, spriteid: 0, type: 0 });
+		}
+		asteroids.splice(0, asteroids.length);
+		
+				
+				
 		if(stats_lives < 1) {
 
 			falconInvincible = true;
@@ -836,11 +847,13 @@ function debug() {
 	}
 	ctx.fillText("explosions: [" + explosionString + "]",10, 140);
 	
+	ctx.fillText("asteroidStep: " + asteroidStep.toFixed(2) + " px/sec", 10, 160);
+	
 	ctx.font = '5pt Courier New';
 	var tempString30 = "";
 	for(var i = 0; i < destroyed_asteroids.length; i++) {	
 		tempString30 = destroyed_asteroids[i];
-		ctx.fillText("." + tempString30, 10, 160 + (i * 7));
+		ctx.fillText("." + tempString30, 10, 180 + (i * 7));
 	}
 	
 	
@@ -904,7 +917,7 @@ function saveInfo()
 
 function onAssetLoad(e) {
 	//console.log(e);
-	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/(14 + maxAsteroidsIMG + maxBackgroundsIMG) * 100) + "%");
+	$("#loadertext").text("Loading Assets: " + Math.floor(++assetsLoaded/(17 + maxAsteroidsIMG + maxBackgroundsIMG) * 100) + "%");
 	
 	if(assetsLoaded >= 14) {
 		if(!gameLoaded) {

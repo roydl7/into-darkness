@@ -1,6 +1,8 @@
 var leaderboardStatus = false;
 var leaderboardData;
 
+var lt, rt, st;
+
 $(document).ready(function() {
 	
 	$("#mutebtn").click(function(){
@@ -28,25 +30,24 @@ $(document).ready(function() {
 	});
 	
 	
-	$("#t-right").on('mousedown touchstart', function(){
+	$("#t-right").on('mousedown', function() {
 		
-		falcon_fa += 5;
-	});
+		rt = setInterval(function() { falcon_fa += 5; }, 20);
+	}).on('mouseup', function() { clearInterval(rt); });
 	
-	$("#t-left").click(function(){
-		
-		falcon_fa -= 5;
-	});
+	$("#t-left").on('mousedown', function() {
+		lt = setInterval(function() { falcon_fa -= 5; }, 20);
+	}).on('mouseup', function() { clearInterval(lt); });
 	
-	$("#t-fire").click(function(){
+	$("#t-fire").on('mousedown', function() {
 		if(!gameStarted) gameScreenProceed();
-		shoot();
-	});
+		at = setInterval(function() { shoot(); }, 100);
+	}).on('mouseup', function() { clearInterval(at); });
 	
-	$("#t-acc").click(function(){
-		acc();
+	$("#t-acc").on('mousedown', function() {
+		touch_acc = true;
+	}).on('mouseup', function() { touch_acc = false; });
 	
-	});
 	
 	
 });
