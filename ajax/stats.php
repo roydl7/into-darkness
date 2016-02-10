@@ -1,6 +1,8 @@
 <?php
 session_start();
 require "mysql.php";
+require "../../common-code.php";
+
 $action = $_POST['action'];
 
 $lookupQuery = "SELECT * FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
@@ -23,12 +25,16 @@ switch($action) {
 						$query = "UPDATE `into_darkness_data` SET `score` = $score, `alive` = $alive, `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
 					}
 					
+					
+					setScore("into-darkness", $score, $_SESSION['tek_emailid']);
+					
 					if($conn -> query($query) === TRUE) {
 							echo "USER_UPDATE";				
 					} else echo $conn->error;
 					
 					$_SESSION['asteroids_generated'] = array(); 
 					$_SESSION['meteors_generated'] = array(); 
+					
 					
 					
 					break;

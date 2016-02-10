@@ -1,4 +1,35 @@
 <?php
+session_start();
+require "ajax/mysql.php";
+
+$username = "Undefined";
+
+if(isset($_SESSION['tek_fname'])) {
+	$username = $_SESSION['tek_fname'];
+} else {
+	echo "Failed to initialize.";
+	die;
+}
+
+$lookupQuery = "SELECT * FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
+$lookupResult = $conn -> query($lookupQuery);
+if ($lookupResult -> num_rows < 1) {
+	$query = "INSERT INTO `into_darkness_data` VALUES ('" . $_SESSION['tek_emailid'] . "', '" . $_SESSION['tek_fname'] . "', 0, 0, 0, " . time() . ")";
+	if($conn -> query($query) === TRUE) {
+	} else echo $conn->error; 
+} else {
+	$query = "UPDATE `into_darkness_data` SET `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
+	$conn -> query($query);
+}
+
+
+$highscore = 0;
+$query = "SELECT `score` FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
+$result = $conn -> query($query);
+if ($result -> num_rows > 1)					
+	$row = $result -> fetch_array();
+	$highscore = $row[0];
+else $highscore = 0;
 
 ?>
 <html>
@@ -94,9 +125,9 @@
 		<img id = "headimg" src = "images/logo3.png"></img>
 		<br/>
 		<span class='welcomenigga'>
-			WELCOME <?php echo isset($_SESSION['tek_fname']) ? $_SESSION['tek_fname'] : "Undefined" ; ?>. 
+			WELCOME <?php echo $username; ?>. 
 			<br/>YOUR CURRENT HIGH SCORE:<br/>
-			<span class='score' data-score='2343'><?php echo isset($_SESSION['current_score']) ? $_SESSION['current_score'] : 0; ?></span>
+			<span class='score' data-score='2343'><?php echo $highscore; ?></span>
 		</span>
 		
 		<br/><br/>
