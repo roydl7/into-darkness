@@ -94,9 +94,9 @@
 		<img id = "headimg" src = "images/logo3.png"></img>
 		<br/>
 		<span class='welcomenigga'>
-			Welcome <?php echo "#NAME"; ?>. 
-			<br/>Your current high score:<br/>
-			<span class='score' data-score='2343'><?php echo '0'; ?></span>
+			WELCOME <?php echo isset($_SESSION['tek_fname']) ? $_SESSION['tek_fname'] : "Undefined" ; ?>. 
+			<br/>YOUR CURRENT HIGH SCORE:<br/>
+			<span class='score' data-score='2343'><?php echo isset($_SESSION['current_score']) ? $_SESSION['current_score'] : 0; ?></span>
 		</span>
 		
 		<br/><br/>

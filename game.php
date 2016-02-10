@@ -1,7 +1,7 @@
 <?php 
 session_start();
-$_SESSION['tek_emailid'] = uniqid() . "@email.com";
-$_SESSION['tek_fname'] = "player_" . uniqid();
+//$_SESSION['tek_emailid'] = uniqid() . "@email.com";
+//$_SESSION['tek_fname'] = "player_" . uniqid();
 ?>
 <html>
 <head>

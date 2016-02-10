@@ -96,7 +96,9 @@ td {
 .welcomenigga {
 	color: white;
 	font-family: 'Arial';
-	
+	text-align: center;
+	margin: auto;
+	display: block;
 	
 }
 
