@@ -26,6 +26,7 @@ if ($lookupResult -> num_rows < 1) {
 $highscore = 0;
 $query = "SELECT `score` FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
 $result = $conn -> query($query);
+
 if ($result -> num_rows > 1) {			
 	$row = $result -> fetch_array();
 	$highscore = $row[0];
