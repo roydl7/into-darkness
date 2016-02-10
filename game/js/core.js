@@ -141,7 +141,7 @@ function gameScreenProceed()
 						controlsEnabled = true;
 						stats_deaths = stats_destroyed = 0;
 						stats_lives = 3;
-						stats_gameStartAt = meteor_lastshower = asteroids_lastbelt = new Date().getTime();
+						stats_gameStartAt = meteor_lastshower = asteroids_lastbelt = wormhole_last = new Date().getTime();
 						asteroids.splice(0, asteroids.length);
 						meteors.splice(0, meteors.length);
 				
@@ -155,6 +155,7 @@ function gameScreenProceed()
 				}
 	
 }
+
 function preload() {
 	
 	canvas = document.getElementById("game");

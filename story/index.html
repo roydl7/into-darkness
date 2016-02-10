@@ -1,0 +1,70 @@
+<html>
+<head>
+	<title>Story</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Made with WOW Slider - Create beautiful, responsive image sliders in a few clicks. Awesome skins and animations. Jquery slider" />
+	
+	<link rel="stylesheet" type="text/css" href="engine1/style.css" />
+	<link rel="stylesheet" href="../css/home.css"></link>
+	<script type="text/javascript" src="engine1/jquery.js"></script>
+
+</head>
+<body style="background-color:#d7d7d7;margin:auto; display:none; overflow:hidden;">
+	
+	<br/><br/>
+	<div id="wowslider-container1">
+	<div class="ws_images"><ul>
+		<li><img src="data1/images/supernova.jpg" alt=" In the year, 2438 history took a turn, a gigantic solar flare sped across the void to scorch the earth. In an instant the already fragile earth was devastated." title="" id="wows1_0"/><big>In the year, 2438 history took a turn, a gigantic solar flare sped across the void to scorch the earth. In an instant the already fragile earth was devastated.<br/><br/></big></li>
+		<li><img src="data1/images/1339717.jpg" alt="     This is 200 P.SE (Post- Scorch Earth). Not even science can do everything. The surface is toxic.
+" title="" id="wows1_1"/><big>     This is 200 P.SE (Post- Scorch Earth). Not even science can do everything. The surface is toxic.<br/><br/>
+</big></li>
+		<li><img src="data1/images/cl_base_ext.jpg" alt="Humans live below the sea in pressurized bunkers using the earth’s core as a source of energy.
+" title="" id="wows1_2"/><big>Humans live below the sea in pressurized bunkers using the earth’s core as a source of energy.<br/><br/>
+</big></li>
+		<li><img src="data1/images/bgscore.jpg" alt="bootstrap carousel" title="" id="wows1_3" /> <big>XDSE (Xtreme Deep Space Exploration) is a space programme run by the Gaia corps. This is their 75th mission to the outer reaches of the galaxy searching for a habitable planet.<br><br>You, a cosmonaut are aboard the Millenium Falcon travelling through the galaxy.<br/><br/></big></li>
+		<li><img src="data1/images/instpage3.jpg" alt="Many perils await you on your journey 'Into Darkness'." title="" id="wows1_4"/><big>Many perils await you on your journey 'Into Darkness'. Dont fail the earth it depends on your skill ...<br/><br/><br/></big></li>
+	</ul></div>
+	<div class="ws_thumbs">
+<div>
+		<a href="#wows1_0" title=" In the year, 2438 history took a turn, a gigantic solar flare sped across the void to scorch the earth. In an instant the already fragile earth was devastated."><img src="data1/tooltips/supernova.jpg" alt="" /></a>
+		<a href="#wows1_1" title="     This is 200 P.SE (Post- Scorch Earth). Not even science can do everything. The surface is toxic.
+"><img src="data1/tooltips/1339717.jpg" alt="" /></a>
+		<a href="#wows1_2" title="Humans live below the sea in pressurized bunkers using the earth’s core as a source of energy.
+"><img src="data1/tooltips/cl_base_ext.jpg" alt="" /></a>
+		<a href="#wows1_3" title=""><img src="data1/tooltips/bgscore.jpg" alt="" /></a>
+		<a href="#wows1_4" title="Many perils await you on your journey 'Into Darkness'."><img src="data1/tooltips/instpage3.jpg" alt="" /></a>
+	</div>
+</div>
+<div class="ws_script" style="position:absolute;left:-99%"></div>
+	<div class="ws_shadow"></div>
+	</div>	
+	<script type="text/javascript" src="engine1/wowslider.js"></script>
+	<script type="text/javascript" src="engine1/script.js"></script>
+
+	
+	<br/><br/>
+	
+	<script>
+	$(document).ready(function() {
+		$("#wowslider-container1").hide();
+		$("body").fadeIn(1000, function() { 
+			$("#wowslider-container1").fadeIn(1000);
+		});
+	});
+	
+	document.addEventListener("keydown", function(e) {
+		if(e.keyCode == 39) {
+			jQuery(".ws_next").click();
+		} else if(e.keyCode == 37) {
+			jQuery(".ws_prev").click();
+		}
+	});
+	</script>
+	
+	<span style = "position: absolute; z-index: 100; top: 87.5%; width:100%; border: 1px;"></img><span style="margin: 0 auto; border: 1px solid transparent; width:250px; display: block;"><img style="width:50%; margin: auto; display:block; border: 1px solid red;" src="../images/play.png" onclick="window.top.location='../game.php'" /><img src  = '../images/back.png' style = ' width: 50px; border: 1px solid red;' onclick='window.location="../"'/></span></span></br> 	
+<video autoplay loop id="video" muted="true">
+		<source src = "../media/video.webm"></source>
+	</video>
+	
+</body>
+</html>

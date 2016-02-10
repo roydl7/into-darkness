@@ -55,7 +55,7 @@ switch($action) {
 						$_SESSION['meteors_destroyed'] = count(array_intersect($_SESSION['meteors_generated'], $_POST['destroyed_muids']));
 					}
 					
-					$_SESSION['current_score'] = ceil(( time() - $_SESSION['gameplay_session_start_time'] ) * ($_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2));
+					$_SESSION['current_score'] = ceil( /*( time() - $_SESSION['gameplay_session_start_time'] ) **/ ($_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2));
 					$gamedata = array(
 						'd' => $_SESSION['player_deaths'], 
 						's' => $_SESSION['asteroids_destroyed'] + $_SESSION['meteors_destroyed'] * 2,

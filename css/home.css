@@ -65,3 +65,44 @@
 	height: 100%;
 	display: block;
 }
+
+table
+{
+		
+		margin: auto;
+		width: 400px;
+		
+}
+
+tr{
+	background: black;
+	cursor: pointer;
+	color: cyan;
+	transition: 0.4s;
+}
+tr:hover {
+	color: yellow;
+	font-size: 30px;
+	/*transform: rotate(360deg);*/
+}
+
+td {
+	font-family: 'Arial';
+	padding: 5px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.welcomenigga {
+	color: white;
+	font-family: 'Arial';
+	
+	
+}
+
+.score {
+		color :red;
+		font-weight: bold;
+		font-size: 30px;
+		
+}
