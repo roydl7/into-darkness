@@ -103,10 +103,11 @@ else {
 	
 	function lbinit() {
 		
-		$('table').animate({'margin-top': '-50'}, 1500);
+		$('table').animate({'margin-top': '0'}, 1500);
 		$("#leaderboarddiv").fadeIn();
 		$(".option").fadeOut();
 		$(".welcomediv").fadeOut();
+		$(".img1").fadeIn().animate({'height':'40px'}, 'slow');
 	}
 	
 	function lbend() {
@@ -125,6 +126,8 @@ else {
 		}
 		
 		$('table').css('margin-top', '100');
+		
+		$("#tablearea").prepend('<center><img class="img1" style="display:none; height:5px; margin-top:-40px;" src="images/leaderboard.png"/></center>');
 		
 	}
 	</script>
