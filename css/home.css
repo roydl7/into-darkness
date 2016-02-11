@@ -83,7 +83,7 @@ tr{
 tr:hover {
 	color: yellow;
 	font-size: 30px;
-	/*transform: rotate(360deg);*/
+	
 }
 
 td {
