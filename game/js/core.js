@@ -182,11 +182,11 @@ function preload() {
 		
 	});
 	
-	//canvas.width  = window.innerWidth - ((5/100)*window.innerWidth);
-	//canvas.height = window.innerHeight - ((5/100)*window.innerHeight);
+	canvas.width  = window.innerWidth;// - ((1/100)*window.innerWidth);
+	canvas.height = window.innerHeight;// - ((5/100)*window.innerHeight);
 	
-	canvas.width = 1366;
-	canvas.height = 768;
+	//canvas.width = 1366;
+	//canvas.height = 768;
 	
 	falcon_x = canvas.width/2;
 	falcon_y = canvas.height/2;
@@ -343,8 +343,8 @@ function render() {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
-		wormhole_x = 100 + (Math.random() * (canvas.width - 200));
-		wormhole_y = 100 + (Math.random() * (canvas.height - 200));
+		wormhole_x = 250 + (Math.random() * (canvas.width - 350));
+		wormhole_y = 250 + (Math.random() * (canvas.height - 350));
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
 		wormholeImg = Math.floor(Math.random() * 5);
@@ -865,7 +865,8 @@ function drawScore() {
 	ctx.font = 'bold 15pt Arial';
     ctx.fillStyle = 'lightgreen';
 	//ctx.strokeStyle = 'lightgreen';
-	ctx.fillText(stats_destroyed, canvas.width - 60, 27);
+	ctx.textAlign = 'right';
+	ctx.fillText(stats_destroyed, canvas.width - 30, 27);
 	ctx.textAlign = 'right';
 	
 	var totalSec = (new Date().getTime() - stats_gameStartAt);

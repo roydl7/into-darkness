@@ -1,7 +1,7 @@
 <?php
 session_start();
 require "mysql.php";
-require "../../common-code.php";
+//require "../../common-code.php";
 
 $action = $_POST['action'];
 
@@ -26,7 +26,7 @@ switch($action) {
 					}
 					
 					
-					setScore("into-darkness", $score, $_SESSION['tek_emailid']);
+					//setScore("into-darkness", $score, $_SESSION['tek_emailid']);
 					
 					if($conn -> query($query) === TRUE) {
 							echo "USER_UPDATE";				

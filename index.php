@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+$_SESSION['tek_fname'] = 'myname';
+$_SESSION['tek_emailid'] = 'myemail';
+
+
+
+
 require "ajax/mysql.php";
 
 $username = "Undefined";
@@ -27,7 +34,7 @@ $highscore = 0;
 $query = "SELECT `score` FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
 $result = $conn -> query($query);
 
-if ($result -> num_rows > 1) {			
+if ($result -> num_rows > 0) {			
 	$row = $result -> fetch_array();
 	$highscore = $row[0];
 }
@@ -88,8 +95,8 @@ else {
 	
 	function incscore() {
 		if(parseInt($('.score').attr('data-score')) > parseInt($('.score').text())) {
-			var score = parseInt($('.score').text()) + 5;
-			$('.score').text(++score);
+			var score = parseInt($('.score').text()) + 1;
+			$('.score').text(score);
 			setTimeout('incscore()', 1);
 		}
 	}
@@ -99,13 +106,13 @@ else {
 		$('table').animate({'margin-top': '-50'}, 1500);
 		$("#leaderboarddiv").fadeIn();
 		$(".option").fadeOut();
-		$(".welcomenigga").fadeOut();
+		$(".welcomediv").fadeOut();
 	}
 	
 	function lbend() {
 		$("#leaderboarddiv").fadeOut();
 		$(".option").fadeIn();
-		$(".welcomenigga").fadeIn();
+		$(".welcomediv").fadeIn();
 	}
 	
 	function loadlb (data) {
@@ -121,6 +128,7 @@ else {
 		
 	}
 	</script>
+	<title>Into Darkness - Teknack 2016</title>
 </head>
 <body style="color: white;">
 	<br/>
@@ -128,10 +136,10 @@ else {
 	<div id = "main">
 		<img id = "headimg" src = "images/logo3.png"></img>
 		<br/>
-		<span class='welcomenigga'>
-			WELCOME <?php echo $username; ?>. 
-			<br/>YOUR CURRENT HIGH SCORE:<br/>
-			<span class='score' data-score='2343'><?php echo $highscore; ?></span>
+		<span class='welcomediv'>
+			Welcome, <?php echo $username; ?>. 
+			<br/><br/>HIGHSCORE<br/>
+			<span class='score' data-score='<?php echo $highscore; ?>'>0</span>
 		</span>
 		
 		<br/><br/>

@@ -93,13 +93,13 @@ td {
 	text-align: center;
 }
 
-.welcomenigga {
+.welcomediv {
 	color: white;
 	font-family: 'Arial';
 	text-align: center;
 	margin: auto;
 	display: block;
-	
+	font-weight: bold;
 }
 
 .score {

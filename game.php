@@ -6,6 +6,7 @@ session_start();
 <html>
 <head>
 <meta content='user-scalable=0'/>
+
 <link rel="stylesheet" href="game/css/style.css"></link>
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="game/js/core.js"></script>
