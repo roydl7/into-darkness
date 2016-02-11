@@ -170,7 +170,7 @@ else {
 		
 		</div>
 		
-		<span class='closebtn' onclick='lbend()' title="Get back nigga">Close</span>
+		<span class='closebtn' onclick='lbend()' title="Back">Close</span>
 		
 		
 	
