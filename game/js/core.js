@@ -343,8 +343,8 @@ function render() {
 		wormholeTransition = 0;
 		wormholeTransitionInProgress = true;
 		wormholeTransitionDirection = 0;
-		wormhole_x = 250 + (Math.random() * (canvas.width - 350));
-		wormhole_y = 250 + (Math.random() * (canvas.height - 350));
+		wormhole_x = canvas.width/2;//250 + (Math.random() * (canvas.width - 350));
+		wormhole_y = canvas.height/2; //250 + (Math.random() * (canvas.height - 350));
 		wormhole_last = new Date().getTime();
 		wormholeEnabled = true;
 		wormholeImg = Math.floor(Math.random() * 5);

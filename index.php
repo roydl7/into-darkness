@@ -102,7 +102,7 @@ else {
 	}
 	
 	function lbinit() {
-		
+		document.location = document.location + "#";
 		$('table').animate({'margin-top': '0'}, 1500);
 		$("#leaderboarddiv").fadeIn();
 		$(".option").fadeOut();
