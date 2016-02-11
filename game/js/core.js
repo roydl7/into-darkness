@@ -332,7 +332,7 @@ function render() {
 	
 	}
 	 
-	if(new Date().getTime() - meteor_lastshower > 15000) {
+	if(new Date().getTime() - meteor_lastshower > 3000) {
 		meteor_lastshower = new Date().getTime();
 		$.post("ajax/stats.php", { action: 'generate_meteor' },  function(data) {
 			meteor_shower(data);
@@ -544,6 +544,7 @@ function render_objects() {
 	} 
 
 	for(var i = 0; i < meteors.length; i++) {
+		
 		meteors[i].x = meteors[i].x - 5* Math.cos(meteors[i].angle * Math.PI/180);
 		meteors[i].y = meteors[i].y - 5* Math.sin(meteors[i].angle * Math.PI/180);
 		
@@ -552,7 +553,7 @@ function render_objects() {
 			ctx.fillText("x: " + Math.round(meteors[i].x, 1) + " y: " + Math.round(meteors[i].y, 1) + " id: " + meteors[i].uid, meteors[i].x, meteors[i].y);
 		}
 		
-		var sx = -20;
+		var sx = 0;
 		var sy = 512 * meteors[i].frameid++;
 		meteors[i].frameid = meteors[i].frameid > 5 ? 0 : meteors[i].frameid + 0;
 		
@@ -829,33 +830,40 @@ function debug() {
 	ctx.fillText("fps: " + Math.round(fps, 0),10, 80);
 	
 	var meteorString = "";
+	for(var i = 0; i < meteors.length; i++) {
+		if(i > 0) meteorString += ", ";
+		meteorString += "" + i;
+	}
+	ctx.fillText("meteors: [" + meteorString + "]",10, 100);
+	
+	var meteorString = "";
 	for(var i = 0; i < asteroids.length; i++) {
 		if(i > 0) meteorString += ", ";
 		meteorString += "" + i;
 	}
-	ctx.fillText("asteroids: [" + meteorString + "]",10, 100);
+	ctx.fillText("asteroids: [" + meteorString + "]",10, 120);
 	
 	var bulletString = "";
 	for(var i = 0; i < bullets.length; i++) {
 		if(i > 0) bulletString += ", ";
 		bulletString += "" + i;
 	}
-	ctx.fillText("bullets: [" + bulletString + "]",10, 120);
+	ctx.fillText("bullets: [" + bulletString + "]",10, 140);
 	
 	var explosionString = "";
 	for(var i = 0; i < explosions.length; i++) {		
 		if(i > 0) explosionString += ", ";
 		explosionString += "" + i + " (" + explosions[i].type + "){" + explosions[i].spriteid + "}";
 	}
-	ctx.fillText("explosions: [" + explosionString + "]",10, 140);
+	ctx.fillText("explosions: [" + explosionString + "]",10, 160);
 	
-	ctx.fillText("asteroidStep: " + asteroidStep.toFixed(2) + " px/sec", 10, 160);
+	ctx.fillText("asteroidStep: " + asteroidStep.toFixed(2) + " px/sec", 10, 180);
 	
 	ctx.font = '5pt Courier New';
 	var tempString30 = "";
 	for(var i = 0; i < destroyed_asteroids.length; i++) {	
 		tempString30 = destroyed_asteroids[i];
-		ctx.fillText("." + tempString30, 10, 180 + (i * 7));
+		ctx.fillText("." + tempString30, 10, 200 + (i * 7));
 	}
 	
 	
