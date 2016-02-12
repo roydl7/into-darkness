@@ -19,12 +19,23 @@ if ($lookupResult -> num_rows < 1) {
 						
 
 switch($action) {
-	case "save": 	if ($lookupResult -> num_rows > 0) {
-						$score = $_SESSION['current_score'];
+	case "save": 
+					$scoreQuery = "SELECT `score` FROM `into_darkness_data` WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "'";
+					$scoreResult = $conn -> query($scoreQuery);
+					
+					$lastHighscore = 0;
+					if ($scoreResult -> num_rows > 0) {			
+						$row = $scoreResult -> fetch_array();
+						$lastHighscore = $row[0];
+					}
+					
+					$score = $_SESSION['current_score'];
+					
+					if ($score > $lastHighscore && $lookupResult -> num_rows > 0) {
+						//$score = $_SESSION['current_score'];
 						$alive = time() - $_SESSION['gameplay_session_start_time'];
 						$query = "UPDATE `into_darkness_data` SET `score` = $score, `alive` = $alive, `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
 					}
-					
 					
 					//setScore("into-darkness", $score, $_SESSION['tek_emailid']);
 					

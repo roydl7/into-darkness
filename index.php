@@ -27,6 +27,7 @@ if ($lookupResult -> num_rows < 1) {
 } else {
 	$query = "UPDATE `into_darkness_data` SET `lastping` = " . time() . " WHERE `tek_emailid` = '" . $_SESSION['tek_emailid'] . "';";
 	$conn -> query($query);
+	
 }
 
 

@@ -182,11 +182,14 @@ function preload() {
 		
 	});
 	
-	canvas.width  = window.innerWidth;// - ((1/100)*window.innerWidth);
-	canvas.height = window.innerHeight;// - ((5/100)*window.innerHeight);
-	
-	//canvas.width = 1366;
-	//canvas.height = 768;
+	if(window.innerWidth <= 1600 && window.innerHeight <= 900)
+	{
+		canvas.width  = window.innerWidth;// - ((1/100)*window.innerWidth);
+		canvas.height = window.innerHeight;// - ((5/100)*window.innerHeight);
+	} else {
+		canvas.width = 1600;
+		canvas.height = 900;
+	}
 	
 	falcon_x = canvas.width/2;
 	falcon_y = canvas.height/2;
@@ -332,7 +335,7 @@ function render() {
 	
 	}
 	 
-	if(new Date().getTime() - meteor_lastshower > 3000) {
+	if(new Date().getTime() - meteor_lastshower > 15000) {
 		meteor_lastshower = new Date().getTime();
 		$.post("ajax/stats.php", { action: 'generate_meteor' },  function(data) {
 			meteor_shower(data);
